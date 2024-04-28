@@ -45,8 +45,7 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=100, null=False, blank=False)
     last_name = models.CharField(max_length=100, blank=True)                 #Only '' is allowed
-    username = models.CharField(max_length=150, unique=True, null=False, blank=False)
-    email = models.EmailField(_('email address'), max_length=150, unique=True, null=False, blank=False)
+    email = models.EmailField(_('email'), max_length=150, unique=True, null=False, blank=False)
     password = models.CharField(max_length=100, null=False, blank=False)
     contact_no = models.CharField(max_length=15, unique=True, null=True)
     address = models.CharField(max_length=200)
@@ -63,26 +62,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
     def __str__(self):
-        return self.username
+        return self.email
     
-
-
-class Person(User):
-
-    bloodType = models.CharField(max_length=3)
-    emergencyContact = models.CharField(max_length=100)
-    disease = models.CharField(max_length=200)
-
-
-    class Meta:
-        abstract = True
-
-
-
-
-
-
-
