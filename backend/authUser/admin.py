@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Donor
+from .models import User, Donor, Patient
 
 
 class UserAdminConfig(admin.ModelAdmin):
@@ -29,3 +29,5 @@ class UserAdminConfig(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(User, UserAdminConfig)
 admin.site.register(Donor)
+admin.site.register(Patient)
+
