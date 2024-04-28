@@ -4,9 +4,8 @@ from rest_framework import serializers
 class DonorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Donor
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'bloodType', 'emergencyContact', 'disease', 'noOfDonations']
+        fields = ['id','first_name', 'last_name', 'email','password', 'bloodType', 'emergencyContact', 'disease', 'noOfDonations']
         extra_kwargs = {
-            'username': {'required': False},
             'first_name': {'required': True},
             'last_name': {'required': True},
             'email': {'required': True},
