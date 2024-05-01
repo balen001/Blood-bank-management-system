@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Donor, Patient
 from rest_framework import generics
-from .serializers import DonorSerializer, PatientSerializer
+from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -29,10 +29,10 @@ class CreatePersonView(APIView):
         if 'register_as' in request.data:
 
             if request.data['register_as'] == 'donor':
-                serializer = DonorSerializer(data=request.data)
+                serializer = DonorRegistrationSerializer(data=request.data)
 
             elif request.data['register_as'] == 'patient':
-                serializer = PatientSerializer(data=request.data)
+                serializer = PatientRegistrationSerializer(data=request.data)
 
 
 

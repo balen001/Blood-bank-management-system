@@ -45,6 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     password = models.CharField(max_length=100, null=False, blank=False)
     contact_no = models.CharField(max_length=15, unique=True, null=True)
     address = models.CharField(max_length=200)
+    dateOfBirth = models.DateField(null=True)
     gender = models.CharField(max_length=10)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

@@ -5,7 +5,8 @@ class Person(User):
 
     bloodType = models.CharField(max_length=3)
     emergencyContact = models.CharField(max_length=100)
-    disease = models.CharField(max_length=200)
+    diseases = models.CharField(max_length=200)
+    allergies = models.JSONField(blank=True, null=True)
 
 
 
