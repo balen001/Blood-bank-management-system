@@ -1,24 +1,29 @@
-import React from 'react';
-import { Grid, Paper, Avatar, Typography, TextField, Stack, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Checkbox, Button, Box, InputLabel, Select, MenuItem } from '@mui/material';
-import AddBox from '@mui/icons-material/AddBox';
-import { Formik, Field, Form, ErrorMessage } from 'formik';
+import React, { useState } from 'react';
+import { Grid, Paper, Snackbar, Typography, TextField, Stack, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Checkbox, Button, Box, InputLabel, Select, MenuItem, Card, AlertTitle } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import axios, { formToJSON } from 'axios'; // Import Axios for making HTTP requests
 
-const RegisterComp = () => {
-    const paperStyle = { padding: '30px 20px', width: 400, margin: "20px auto" }
+
+const RegisterComp = ({register_as}) => {
+
+    // const [showMessage, setShowMessage] = useState(false);
+
+
+    const paperStyle = { padding: '10px 20px 10px 20px', width: 400, margin: "20px auto", backgroundColor: 'white', opacity: '0.90' }
     const headerStyle = { margin: 0 }
-    const avatarStyle = { backgroundColor: '#E04625' }
-    const marginTop = { marginTop: 5 }
+    const marginTop = { marginTop: 3 }
 
     const validationSchema = Yup.object().shape({
-        firstName: Yup.string().required('First Name is required'),
-        lastName: Yup.string().required('Last Name is required'),
+        first_name: Yup.string().required('First Name is required'),
+        last_name: Yup.string().required('Last Name is required'),
         email: Yup.string().matches(/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
             'Invalid email format').required('Email is required'),
         gender: Yup.string().required('Gender is required'),
         password: Yup.string().required('Password is required').min(8, 'Password must be at least 8 characters'),
-        contact_no: Yup.string().required('Phone Number is required').matches(/^\+?[0-9]+$/, 'Invalid phone number').test('len', 'Invalid phone number', val => {
-            if (!val) return false;
+        contact_no: Yup.string().matches(/^\+?[0-9]+$/, 'Invalid phone number').test('len', 'Invalid phone number', val => {
+            if (!val) return true;
             if (val.startsWith('+') && val.length === 14) return true;
             if (!val.startsWith('+') && [11, 15].includes(val.length)) return true;
             return false;
@@ -33,49 +38,93 @@ const RegisterComp = () => {
         // Add more fields as needed
     });
 
+    const handleSubmit = async (values, actions) => {
+        try {
+            const { confirmPassword, ...dataToSend } = values;
+            console.log(JSON.stringify(dataToSend))
+            const response = await axios.post('http://127.0.0.1:8000/api/user/register/', JSON.stringify(dataToSend), {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    // setShowMessage(true);
+                    setOpen(true);
+
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            // Handle any error actions here
+        } finally {
+            actions.setSubmitting(false); // Reset submitting state
+        }
+    };
+
+
+
+    const [open, setOpen] = useState(false);
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+    };
+
     return (
-        <Grid>
+        <Grid >
             <Paper elevation={20} style={paperStyle}>
                 <Grid align='center'>
-                    <Avatar style={avatarStyle}>
-                        <AddBox />
-                    </Avatar>
-                    <h2 style={headerStyle}>Sign Up</h2>
-                    <Typography variant='caption' gutterBottom>Please fill this form to create an account !</Typography>
+                    <h2 style={headerStyle}>Register donor account</h2>
+                    <br />
                 </Grid>
                 <Formik
-                    initialValues={{ firstName: '', lastName: '', email: '', gender: 'male', bloodType: 'None', dob: '', diseases: '', password: '', confirmPassword: '', contact_no: '' }}
+
+                    initialValues={{
+                        first_name: '',
+                        last_name: '',
+                        email: '',
+                        gender: 'male',
+                        bloodType: 'None',
+                        dob: '',
+                        // diseases: '',
+                        password: '',
+                        confirmPassword: '',
+                        contact_no: '',
+                        register_as: register_as
+                    }}
                     validationSchema={validationSchema}
                     validateOnBlur={true}
-                    validateOnChange={true} // add this line
-                    onSubmit={(values, { setSubmitting }) => {
-                        // handle form submission here
-                        setSubmitting(false);
-                    }}
+                    validateOnChange={true}
+                    onSubmit={handleSubmit}
+
+
                 >
                     {({ values, handleChange, handleBlur, errors, touched }) => (
                         <Form>
-                            <Stack spacing={2}>
-                                <TextField name="firstName" type="text" label="First Name" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.firstName} helperText={touched.firstName ? errors.firstName : ""} error={touched.firstName && Boolean(errors.firstName)} />
-                                <TextField name="lastName" type="text" label="Last Name" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.lastName} helperText={touched.lastName ? errors.lastName : ""} error={touched.lastName && Boolean(errors.lastName)} />
-                                <TextField name="email" type="email" label="Email" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.email} helperText={touched.email ? errors.email : ""} error={touched.email && Boolean(errors.email)} />
-                                <TextField name="password" type="password" label="Password" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.password} helperText={touched.password ? errors.password : ""} error={touched.password && Boolean(errors.password)} />
-                                <TextField name="confirmPassword" type="password" label="Confirm Password" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.confirmPassword} helperText={touched.confirmPassword ? errors.confirmPassword : ""} error={touched.confirmPassword && Boolean(errors.confirmPassword)} />
-                                <TextField name="contact_no" type="text" label="Phone Number" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.contact_no} helperText={touched.contact_no ? errors.contact_no : ""} error={touched.contact_no && Boolean(errors.contact_no)} />
-                                <FormControl component="fieldset" style={marginTop}>
+                            <Stack spacing={1.1}>
+                                <TextField size="small" name="first_name" type="text" label="First Name" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.first_name} helperText={touched.first_name ? errors.first_name : ""} error={touched.first_name && Boolean(errors.first_name)} />
+                                <TextField size="small" name="last_name" type="text" label="Last Name" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.last_name} helperText={touched.last_name ? errors.last_name : ""} error={touched.last_name && Boolean(errors.last_name)} />
+                                <TextField size="small" name="email" type="email" label="Email" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.email} helperText={touched.email ? errors.email : ""} error={touched.email && Boolean(errors.email)} />
+                                <TextField size="small" name="password" type="password" label="Password" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.password} helperText={touched.password ? errors.password : ""} error={touched.password && Boolean(errors.password)} />
+                                <TextField size="small" name="confirmPassword" type="password" label="Confirm Password" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.confirmPassword} helperText={touched.confirmPassword ? errors.confirmPassword : ""} error={touched.confirmPassword && Boolean(errors.confirmPassword)} />
+                                <TextField size="small" name="contact_no" type="text" label="Phone Number" fullWidth onChange={handleChange} onBlur={handleBlur} value={values.contact_no} helperText={touched.contact_no ? errors.contact_no : ""} error={touched.contact_no && Boolean(errors.contact_no)} />
+                                <FormControl size="small" component="fieldset" style={marginTop}>
                                     <FormLabel component="legend">Gender</FormLabel>
-                                    <RadioGroup name="gender" onChange={handleChange} onBlur={handleBlur} value={values.gender}>
-                                        <FormControlLabel value="female" control={<Radio />} label="Female" />
+                                    <RadioGroup size="small" name="gender" onChange={handleChange} onBlur={handleBlur} value={values.gender} row>
                                         <FormControlLabel value="male" control={<Radio />} label="Male" />
+                                        <FormControlLabel value="female" control={<Radio />} label="Female" />
                                     </RadioGroup>
                                     {touched.gender && <div>{errors.gender}</div>}
                                 </FormControl>
-                                <InputLabel>Blood Type</InputLabel>
 
                                 <TextField
                                     select
                                     name="bloodType"
                                     label="Blood Type"
+                                    size="small"
                                     fullWidth
                                     required
                                     onChange={handleChange}
@@ -85,7 +134,6 @@ const RegisterComp = () => {
                                     error={touched.bloodType && Boolean(errors.bloodType)}
                                 >
                                     <MenuItem value="None"><em>None</em></MenuItem>
-                                    <MenuItem value>A+</MenuItem>
                                     <MenuItem value="A+">A+</MenuItem>
                                     <MenuItem value="A-">A-</MenuItem>
                                     <MenuItem value="B+">B+</MenuItem>
@@ -96,19 +144,47 @@ const RegisterComp = () => {
                                     <MenuItem value="O-">O-</MenuItem>
                                 </TextField>
 
-                                <TextField name="dob" type="date" label="Date of Birth" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.dob} helperText={touched.dob ? errors.dob : ""} error={touched.dob && Boolean(errors.dob)} InputLabelProps={{shrink:true}} />
-                                <TextField name="diseases" type="text" label="Diseases if any (optional)" fullWidth onChange={handleChange} onBlur={handleBlur} value={values.diseases} helperText={touched.diseases ? errors.diseases : ""} error={touched.diseases && Boolean(errors.diseases)} />
+                                <TextField size="small" name="dob" type="date" label="Date of Birth" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.dob} helperText={touched.dob ? errors.dob : ""} error={touched.dob && Boolean(errors.dob)} InputLabelProps={{ shrink: true }} />
+                                {/* <TextField size="small" name="diseases" type="text" label="Diseases if any (optional)" fullWidth onChange={handleChange} onBlur={handleBlur} value={values.diseases} helperText={touched.diseases ? errors.diseases : ""} error={touched.diseases && Boolean(errors.diseases)} /> */}
 
 
                             </Stack >
                             <Box display="flex" justifyContent="center" mt={2}>
-                                <Button type="submit" variant="contained" color="primary" style={{ cursor: 'pointer' }}>Sign Up</Button>
+                                <Button type="submit" variant="contained" color="primary" style={{
+                                    cursor: 'pointer', margin: '1em', width: '8em', height: '3em', color: 'white', backgroundColor: 'red'
+                                }}>Sign Up</Button>
                             </Box>
                         </Form>
                     )}
                 </Formik>
             </Paper>
+
+            <div>
+
+                {
+
+                    <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                        sx={{
+                            width: '50%',
+                            mx: 'auto',
+                        }}>
+                        <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
+                            Registration successful!
+                        </Alert>
+                    </Snackbar>
+
+                    /* {showMessage && (
+                        <Alert severity="success">
+                            <AlertTitle>Success</AlertTitle>
+                            This is a success Alert with an encouraging title.
+                        </Alert>
+                    )} */
+                }
+
+            </div>
         </Grid>
+
+
     );
 }
 

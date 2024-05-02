@@ -12,7 +12,7 @@ class DonorRegistrationSerializer(serializers.ModelSerializer):
             'last_name': {'required': True},  # it should at least receive ''
             'email': {'required': True},
             'password': {'write_only': True},
-            'contact_no': {'required': True},
+            'contact_no': {'required': False},
             'dateOfBirth': {'required': False},  # 'dateOfBirth': '2000-01-01
             'gender': {'required': True},
             'bloodType': {'required': True},
@@ -50,7 +50,7 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
             'last_name': {'required': True},  # it should at least receive ''
             'email': {'required': True},
             'password': {'write_only': True},
-            'contact_no': {'required': True},
+            'contact_no': {'required': False},
             'dateOfBirth': {'required': False},  # 'dateOfBirth': '2000-01-01
             'gender': {'required': True},
             'bloodType': {'required': True},
