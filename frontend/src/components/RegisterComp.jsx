@@ -41,6 +41,9 @@ const RegisterComp = ({register_as}) => {
     const handleSubmit = async (values, actions) => {
         try {
             const { confirmPassword, ...dataToSend } = values;
+            if (dataToSend.contact_no === '') {
+                delete dataToSend.contact_no;
+            }
             console.log(JSON.stringify(dataToSend))
             const response = await axios.post('http://127.0.0.1:8000/api/user/register/', JSON.stringify(dataToSend), {
                 headers: {
@@ -89,7 +92,6 @@ const RegisterComp = ({register_as}) => {
                         gender: 'male',
                         bloodType: 'None',
                         dob: '',
-                        // diseases: '',
                         password: '',
                         confirmPassword: '',
                         contact_no: '',
