@@ -8,6 +8,12 @@ import axios, { formToJSON } from 'axios'; // Import Axios for making HTTP reque
 
 const RegisterComp = ({register_as}) => {
 
+    if (register_as === undefined) {
+        register_as = "donor"
+    }
+
+    console.log("in RegisterComp: " + register_as)
+
     // const [showMessage, setShowMessage] = useState(false);
 
 
@@ -19,9 +25,9 @@ const RegisterComp = ({register_as}) => {
         first_name: Yup.string().required('First Name is required'),
         last_name: Yup.string().required('Last Name is required'),
         email: Yup.string().matches(/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
-            'Invalid email format').required('Email is required'),
+            'Invalid email format').required('Email is required').min(5, 'Email must be at least 5 characters').max(50, 'Email must be at most 50 characters'),
         gender: Yup.string().required('Gender is required'),
-        password: Yup.string().required('Password is required').min(8, 'Password must be at least 8 characters'),
+        password: Yup.string().required('Password is required').min(8, 'Password must be at least 8 characters').max(20, 'Password must be at most 20 characters'),
         contact_no: Yup.string().matches(/^\+?[0-9]+$/, 'Invalid phone number').test('len', 'Invalid phone number', val => {
             if (!val) return true;
             if (val.startsWith('+') && val.length === 14) return true;
@@ -39,6 +45,7 @@ const RegisterComp = ({register_as}) => {
     });
 
     const handleSubmit = async (values, actions) => {
+        console.log(values);
         try {
             const { confirmPassword, ...dataToSend } = values;
             if (dataToSend.contact_no === '') {
@@ -80,9 +87,10 @@ const RegisterComp = ({register_as}) => {
         <Grid >
             <Paper elevation={20} style={paperStyle}>
                 <Grid align='center'>
-                    <h2 style={headerStyle}>Register donor account</h2>
+                    <h2 style={headerStyle}>Register {register_as} account</h2>
                     <br />
                 </Grid>
+
                 <Formik
 
                     initialValues={{
@@ -95,8 +103,9 @@ const RegisterComp = ({register_as}) => {
                         password: '',
                         confirmPassword: '',
                         contact_no: '',
-                        register_as: register_as
+                        register_as: register_as,
                     }}
+                    enableReinitialize
                     validationSchema={validationSchema}
                     validateOnBlur={true}
                     validateOnChange={true}
@@ -106,6 +115,7 @@ const RegisterComp = ({register_as}) => {
                 >
                     {({ values, handleChange, handleBlur, errors, touched }) => (
                         <Form>
+                            
                             <Stack spacing={1.1}>
                                 <TextField size="small" name="first_name" type="text" label="First Name" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.first_name} helperText={touched.first_name ? errors.first_name : ""} error={touched.first_name && Boolean(errors.first_name)} />
                                 <TextField size="small" name="last_name" type="text" label="Last Name" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.last_name} helperText={touched.last_name ? errors.last_name : ""} error={touched.last_name && Boolean(errors.last_name)} />
@@ -156,6 +166,8 @@ const RegisterComp = ({register_as}) => {
                                     cursor: 'pointer', margin: '1em', width: '8em', height: '3em', color: 'white', backgroundColor: 'red'
                                 }}>Sign Up</Button>
                             </Box>
+
+                            
                         </Form>
                     )}
                 </Formik>

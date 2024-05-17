@@ -35,7 +35,7 @@ const ResponsiveAppBar = () => {
     <AppBar position="sticky" style={{ backgroundColor: 'transparent', color: 'gre' }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <IconButton edge="start" color="inherit" aria-label="menu">
+          <IconButton edge="start" color="inherit" aria-label="menu" component={Link} to="/">
             <img src={logo} alt="logo" style={{ height: '2.5em' }} />
           </IconButton>
 

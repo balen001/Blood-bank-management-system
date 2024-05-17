@@ -15,7 +15,7 @@ const Register = () => {
     const location = useLocation();
     const register_as = location.state?.register_as;
   
-    console.log(register_as);
+    //console.log(register_as);
 
 
     return (
