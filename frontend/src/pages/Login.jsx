@@ -21,6 +21,7 @@ import img3 from '../assets/pexels-pavel.jpg';
 import { useState } from 'react';
 import axios from 'axios';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../constants';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -49,6 +50,8 @@ export default function Login() {
     const [emailError, setEmailError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
 
+    const navigate = useNavigate();
+
     const handleEmailChange = (event) => {
         setEmail(event.target.value);
         if (event.target.value.length < 5 || event.target.value.length > 50) {
@@ -68,38 +71,75 @@ export default function Login() {
     };
 
     //submission logic
-    const handleSubmit = async (values, actions) => {
-        console.log(values);
-        try {
+    const handleSubmit = (event) => {
+        event.preventDefault();
 
-            console.log(JSON.stringify(values)) // printing the request here
-            const response = await axios.post('http://127.0.0.1:8000/api/token/', JSON.stringify(values), {
+        const email = event.target.elements.email.value;
+        const password = event.target.elements.password.value;
+
+        const values = { email, password };
+        const JSONvalues = JSON.stringify(values);
+
+
+
+
+        const response = axios.post('http://localhost:8000/api/token/', JSONvalues, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+
+        }).then(response => {
+
+            //console.log(response.data);
+
+            localStorage.setItem(ACCESS_TOKEN, response.data.access);
+            localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
+
+            // console.log(values);
+            // console.log(values.email);
+            // console.log(localStorage.getItem(ACCESS_TOKEN))
+
+
+
+        }).then(response => {
+            console.log("--------------reached here-----------------------")
+            const res = axios.get('http://localhost:8000/api/user/usertype/', {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+
+                },
+
+                params: {
+                    email : values.email,
                 }
-            })
-                .then(response => {
-                    // setShowMessage(true);
-                    localStorage.setItem(ACCESS_TOKEN, response.data.access);
-                    localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
-                    setOpen(true);
 
 
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            // Handle any error actions here
-        } finally {
-            actions.setSubmitting(false); // Reset submitting state
-        }
+            
+            }).then(res => {
+
+                if (res.data.user_type === 'donor') {
+                    navigate("/home", { state: { user_type: 'donor' } });
+    
+                } else if (res.data.user_type === 'patient') {
+                    
+                    navigate("/home", { state: { user_type: 'donor' } });
+                }
+            }).catch(error => {
+                console.error('There was an error!', error);
+            });
+
+
+
+
+
+        })
+
+
     };
 
 
-    // console.log({
-    //     email: data.get('email'),
-    //     password: data.get('password'),
-    // });
+
 
     return (
         <Grid container component="main" sx={{ height: '100vh' }}>
@@ -114,11 +154,11 @@ export default function Login() {
                     height: '100vh',
                 }}
             >
-                <Carousel autoPlay infiniteLoop interval={2000}>
+                {/* <Carousel autoPlay infiniteLoop interval={2000}>
                     <div style={{ backgroundImage: `url(${img1})`, backgroundSize: 'cover', height: '100%' }} />
                     <div style={{ backgroundImage: `url(${img2})`, backgroundSize: 'cover', height: '100vh' }} />
                     <div style={{ backgroundImage: `url(${img3})`, backgroundSize: 'cover', height: '100vh' }} />
-                </Carousel>
+                </Carousel> */}
             </Grid>
             <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square style={{ backgroundColor: '#1e3263' }}>
                 <Box

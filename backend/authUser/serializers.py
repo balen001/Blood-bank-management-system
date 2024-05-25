@@ -1,6 +1,37 @@
 from .models import Donor, Patient
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.hashers import make_password
 
+
+
+import logging
+logger = logging.getLogger(__name__)
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        print("Creating tokens...")
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['is_admin'] = user.is_admin
+        return token
+
+    def validate(self, attrs):
+        print("Validating user credentials for token creation...")
+        data = super().validate(attrs)
+
+        
+
+        print(f"User {self.user.email} authenticated, creating tokens...")
+        refresh = self.get_token(self.user)
+
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+        data['email'] = self.user.email
+        data['is_admin'] = self.user.is_admin
+
+        return data
 
 class DonorRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,7 +69,13 @@ class DonorRegistrationSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
+        #print("Creating Donor..: " + str(validated_data)) 
         return Donor.objects.create(**validated_data)
+
+        
+
+
 
 
 class PatientRegistrationSerializer(serializers.ModelSerializer):
@@ -78,4 +115,6 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
         # allergies = models.JSONField(blank=True, null=True)
 
     def create(self, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
+        #print("Creating Patient..: " + str(validated_data)) 
         return Patient.objects.create(**validated_data)

@@ -20,7 +20,9 @@ class CustomUserManager(BaseUserManager):
         if other_fields.get('is_superuser') is not True:
             raise ValueError(_('Superuser must be assigned to is_superuser=True.'))
         
+
         return self.create_user(email, first_name, last_name, password, **other_fields)
+
 
 
 
@@ -32,11 +34,15 @@ class CustomUserManager(BaseUserManager):
         if not password:
             raise ValueError(_('The Password must be set'))
         
+        print("create user called")
+        
         email = self.normalize_email(email)
         user = self.model(email=email, first_name=first_name, last_name=last_name, **other_fields)
         user.set_password(password)
         user.save()
         return user
+    
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=100, null=False, blank=False)

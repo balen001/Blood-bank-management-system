@@ -21,7 +21,7 @@ const Register = () => {
     return (
         <>
             <GlobalStyle />
-            <div style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundColor: '#040E28', margin: '0', backgroundSize: '70%', backgroundRepeat: 'no-repeat' }}>
+            <div style={{ backgroundImage: `url(${backgroundImage})`, backgroundColor: '#040E28', margin: '0', backgroundSize: '70%', backgroundRepeat: 'no-repeat' }}>
                 <ResponsiveAppBar />
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginRight: '8em', marginTop: '2em' }}>
                     <RegisterComp register_as={register_as} />

@@ -18,7 +18,6 @@ function LandingPage(){
             <GlobalStyle/>
             <div style={{ 
                 backgroundImage: `url(${backgroundImage})`, 
-                backgroundSize: 'cover', 
                 backgroundColor: '#040E28', 
                 margin: '0', 
                 backgroundSize: '70%', 
