@@ -28,10 +28,14 @@ class UserView(APIView):
         #user = request.user
         if Donor.objects.filter(email=request.query_params.get('email')).exists():
 
-            return Response({'user_type': 'donor'})
+            user = Donor.objects.get(email=request.query_params.get('email'))
+
+            return Response({'user_type': 'donor', 'userId': user.id})
         elif Patient.objects.filter(email=request.query_params.get('email')).exists():
-            return Response({'user_type': 'patient'})
+            user = Patient.objects.get(email=request.query_params.get('email'))
+            return Response({'user_type': 'patient' , 'userId': user.id})
         else:
+            user = Patient.objects.get(email=request.query_params.get('email'))
             return Response({'user_type': 'admin'})   #returns admin if its not donor or patient (be carefullll!)
 
 

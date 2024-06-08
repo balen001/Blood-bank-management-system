@@ -4,5 +4,5 @@ from .Person import Person
 
 
 class Patient(Person):
-    pass
+    allergies = models.JSONField(blank=True, null=True)
 

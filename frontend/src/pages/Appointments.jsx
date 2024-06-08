@@ -1,9 +1,12 @@
+import React from 'react';
 import { useLocation } from 'react-router-dom';
-import DonorHome from './Donor/DonorHome';
-import PatientHome from './Patient/PatientHome';
+import DonorAppointments from "./Donor/DonorAppointments";  
+// import DonorAppointments
 
+// Appointments will be for donors and patients
 
-function Home() {
+function Appointments(){
+
     const location = useLocation();
     let user_type = location.state ? location.state.user_type : null;
     let userId = location.state ? location.state.userId : null;
@@ -19,13 +22,15 @@ function Home() {
     }
 
     if (user_type === 'donor') {
-        return <DonorHome />;
+        return <DonorAppointments />;
     } else if (user_type === 'patient') {
-        return <PatientHome />;
+        return null; //for now later we will add patient appointments
     }
 
     // Return a default component or null if user_type is not 'donor' or 'patient'
     return null;
+
+
 }
 
-export default Home;
+export default Appointments;

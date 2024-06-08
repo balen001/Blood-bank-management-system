@@ -17,14 +17,31 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import { useAppStore } from '../appStore';
 import { useNavigate } from 'react-router-dom';
-
+import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import axios from 'axios';
 
 const AppBar = styled(MuiAppBar, {
-  
+
 })(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
- 
+
 }));
+
+
+// Notification clearing logic
+
+async function clearAllNotifications() {
+  try {
+    const response = await axios.delete(''); // Add an endpoint to clear all notifications
+    console.log(response.data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+
 
 
 
@@ -72,13 +89,21 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function NavBar() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+
+  const [notificationsAnchorEl, setNotificationsAnchorEl] = React.useState(null);
+
   const updateOpen = useAppStore((state) => state.updateOpen);
   const dopen = useAppStore((state) => state.dopen);
   const navigate = useNavigate()
 
 
+
+
+
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const isNotificationsMenuOpen = Boolean(notificationsAnchorEl);
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -97,6 +122,7 @@ export default function NavBar() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
+
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -114,11 +140,70 @@ export default function NavBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-      <MenuItem onClick={()=> {navigate("/logout")}}>Logout</MenuItem>
+      <MenuItem onClick={() => { navigate("/profile") }}>Profile</MenuItem>
+      <MenuItem onClick={() => { navigate("/account") }}>My account</MenuItem>
+      <MenuItem onClick={() => { navigate("/logout") }}>Logout</MenuItem>
     </Menu>
   );
+
+
+
+
+  // Added function to close notifications menu
+  const handleNotificationsMenuClose = () => {
+    setNotificationsAnchorEl(null);
+  };
+
+  // Added function to open notifications menu
+  const handleNotificationsMenuOpen = (event) => {
+    setNotificationsAnchorEl(event.currentTarget);
+  };
+
+  const notifications = ["Notification 1 ---------------------\n----------------------", "Notification 2", "Notification 3"]; // later this should be fetched from the database
+
+  const notificationsMenuId = 'primary-notifications-menu';
+  const renderNotificationsMenu = (
+    <Menu
+      sx={{ '& .MuiPaper-root': { width: '250px' } }}
+      anchorEl={notificationsAnchorEl}
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      id={notificationsMenuId}
+      keepMounted
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      open={isNotificationsMenuOpen}
+      onClose={handleNotificationsMenuClose}
+    >
+      {notifications.map((notification, index) => (
+        <MenuItem key={index} onClick={handleNotificationsMenuClose}>
+          <div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>{notification}</div>
+        </MenuItem>
+      ))}
+      
+
+
+      <Box display="flex" justifyContent="space-between">
+        <MenuItem onClick={() => { navigate("/notifications") }} style={{ whiteSpace: 'pre-wrap', fontSize: 12 }} >
+          <VisibilityIcon fontSize="small" />
+          View notifications
+        </MenuItem>
+        <MenuItem onClick={() => { clearAllNotifications(); handleNotificationsMenuClose(); }}> {/*Clear the notifications in the database*/}
+          <DeleteIcon fontSize="small" />
+          <div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>Clear all</div>
+        </MenuItem>
+      </Box>
+
+      
+    </Menu>
+  );
+
+
+
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
   const renderMobileMenu = (
@@ -137,19 +222,21 @@ export default function NavBar() {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
+      {/* <MenuItem>
         <IconButton size="large" aria-label="show 4 new mails" color="inherit">
           <Badge badgeContent={4} color="error">
             <MailIcon />
           </Badge>
         </IconButton>
         <p>Messages</p>
-      </MenuItem>
+      </MenuItem> */}
       <MenuItem>
         <IconButton
           size="large"
-          aria-label="show 17 new notifications"
+          aria-label="show 10 new notifications"
           color="inherit"
+          // Added onClick handler to open notifications menu
+          onClick={handleNotificationsMenuOpen}
         >
           <Badge badgeContent={17} color="error">
             <NotificationsIcon />
@@ -171,10 +258,10 @@ export default function NavBar() {
       </MenuItem>
     </Menu>
   );
-      {/* 040E28   */}
+  {/* 040E28   */ }
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="fixed" sx ={{backgroundColor: "#FFFFFF", color: "#000000"}}>
+      <AppBar position="fixed" sx={{ backgroundColor: "#FFFFFF", color: "#000000" }}>
 
         <Toolbar>
           <IconButton
@@ -183,7 +270,7 @@ export default function NavBar() {
             color="inherit"
             aria-label="open drawer"
             sx={{ mr: 2 }}
-            onClick={()=>updateOpen(!dopen)}
+            onClick={() => updateOpen(!dopen)}
           >
             <MenuIcon />
           </IconButton>
@@ -195,7 +282,7 @@ export default function NavBar() {
           >
             {/* Home */}
           </Typography>
-          <Search>
+          {/* <Search>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
@@ -203,23 +290,26 @@ export default function NavBar() {
               placeholder="Search…"
               inputProps={{ 'aria-label': 'search' }}
             />
-          </Search>
+          </Search> */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <IconButton size="large" aria-label="show 4 new mails" color="inherit">
+            {/* <IconButton size="large" aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={4} color="error">
                 <MailIcon />
               </Badge>
-            </IconButton>
+            </IconButton> */}
             <IconButton
               size="large"
               aria-label="show 17 new notifications"
               color="inherit"
+              // Added onClick handler to open notifications menu
+              onClick={handleNotificationsMenuOpen}
             >
               <Badge badgeContent={17} color="error">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
+
             <IconButton
               size="large"
               edge="end"
@@ -248,6 +338,8 @@ export default function NavBar() {
       </AppBar>
       {renderMobileMenu}
       {renderMenu}
+      {/* Added notifications menu */}
+      {renderNotificationsMenu}
     </Box>
   );
 }

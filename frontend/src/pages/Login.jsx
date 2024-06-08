@@ -119,11 +119,11 @@ export default function Login() {
             }).then(res => {
 
                 if (res.data.user_type === 'donor') {
-                    navigate("/home", { state: { user_type: 'donor' } });
+                    navigate("/home", { state: { user_type: 'donor', userId: res.data.userId } });
     
                 } else if (res.data.user_type === 'patient') {
                     
-                    navigate("/home", { state: { user_type: 'donor' } });
+                    navigate("/home", { state: { user_type: 'donor', userId: res.data.userId } });
                 }
             }).catch(error => {
                 console.error('There was an error!', error);

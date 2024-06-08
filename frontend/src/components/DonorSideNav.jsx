@@ -92,11 +92,15 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-export default function SideNav() {
+export default function DonorSideNav() {
+
   const theme = useTheme();
   //const [open, setOpen] = React.useState(true);
   const navigate = useNavigate();
   const open = useAppStore((state) => state.dopen);
+
+  console.log(localStorage.getItem('user_type'));
+  console.log("From DonorSideNav");
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -135,7 +139,7 @@ export default function SideNav() {
 
             {/* My Profile */}
 
-            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/home')}>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/profile')}>
               <ListItemButton
                 sx={{
                   minHeight: 48,
@@ -158,7 +162,7 @@ export default function SideNav() {
 
             {/* Appointments */}
 
-            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/home')}>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/appointments')}>
               <ListItemButton
                 sx={{
                   minHeight: 48,
@@ -181,7 +185,7 @@ export default function SideNav() {
 
             {/* Donation history */}
 
-            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/home')}>
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/donationhistory')}>
               <ListItemButton
                 sx={{
                   minHeight: 48,

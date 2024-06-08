@@ -1,6 +1,6 @@
 import React from 'react';
 import Box from '@mui/material/Box';
-import SideNav from '../../components/SideNav';
+import DonorSideNav from '../../components/DonorSideNav';
 import NavBar from '../../components/NavBar';
 import Grid from '@mui/material/Grid';
 import Item from '@mui/material/Grid';
@@ -42,7 +42,7 @@ function DonorHome() {
             <NavBar />
             <Box height={70} />
             <Box sx={{ bgcolor: '#ECEFF1', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <SideNav />
+                <DonorSideNav />
                 <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                     <Grid container spacing={2}>
 

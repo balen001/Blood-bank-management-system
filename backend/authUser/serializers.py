@@ -48,6 +48,7 @@ class DonorRegistrationSerializer(serializers.ModelSerializer):
             'gender': {'required': True},
             'bloodType': {'required': True},
             'diseases': {'required': False},
+            'allergies': {'required': False},
 
             # first_name = models.CharField(max_length=100, null=False, blank=False)
             # last_name = models.CharField(max_length=100, blank=True) #Only '' is allowed
@@ -93,7 +94,7 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
             'bloodType': {'required': True},
             'emergencyContact': {'required': False},
             'diseases': {'required': False},
-            'allergies': {'required': False},
+            
 
         }
 
