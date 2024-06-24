@@ -103,6 +103,7 @@ export default function Login() {
 
         }).then(response => {
             console.log("--------------reached here-----------------------")
+            
             const res = axios.get('http://localhost:8000/api/user/usertype/', {
                 headers: {
                     'Content-Type': 'application/json',
@@ -117,14 +118,20 @@ export default function Login() {
 
             
             }).then(res => {
+                
+                
+                console.log("returned data is:" + res.data)
 
                 if (res.data.user_type === 'donor') {
-                    navigate("/home", { state: { user_type: 'donor', userId: res.data.userId } });
-    
+                    navigate("/home", { state: { user_type: 'donor', userId: res.data.userId, userName: res.data.userName } });
                 } else if (res.data.user_type === 'patient') {
+                    console.log("--------before navigation :")
+                    navigate("/home", { state: { user_type: 'patient', userId: res.data.userId, userName: res.data.userName } });
+                } else if (res.data.user_type === 'admin'){
                     
-                    navigate("/home", { state: { user_type: 'donor', userId: res.data.userId } });
+                    navigate("/home", { state: { user_type: 'admin', userId: res.data.userId, userName: res.data.userName } });
                 }
+                
             }).catch(error => {
                 console.error('There was an error!', error);
             });

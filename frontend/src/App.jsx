@@ -9,9 +9,13 @@ import Home from './pages/Home'
 import Profile from './pages/Profile'
 import About from './pages/About'
 import DonationHistory from './pages/Donor/DonationHistory'
+import TransfusionHistory from './pages/Patient/TransfusionHistory'
 import Appointments from './pages/Appointments'
 import Account from './pages/Account'
 import Notifications from './pages/Notifications'
+import AddReceptionist from './pages/Admin/AddReceptionist'
+import AddDoctor from './pages/Admin/AddDoctor'
+
 
 function Logout() {
   localStorage.clear()
@@ -36,9 +40,12 @@ function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
         <Route path="/donationhistory" element={<ProtectedRoute><DonationHistory /></ProtectedRoute>} />
+        <Route path="/transfusionhistory" element={<ProtectedRoute><TransfusionHistory /></ProtectedRoute>} />
         <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
         <Route path="/account" element={<ProtectedRoute><Account/></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications/></ProtectedRoute>} />
+        <Route path="/addReceptionist" element={<ProtectedRoute><AddReceptionist/></ProtectedRoute>} />
+        <Route path="/addDoctor" element={<ProtectedRoute><AddDoctor/></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
 
       </Routes>

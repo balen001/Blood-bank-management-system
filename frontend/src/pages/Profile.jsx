@@ -1,11 +1,13 @@
 import React from 'react';
 import DonorSideNav from '../components/DonorSideNav';
+import PatientSideNav from '../components/PatientSideNav';
 import Box from '@mui/material/Box';
 import NavBar from '../components/NavBar';
 import { Container, Typography, Grid, TextField, Button, MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
 import { useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
+import AdminSideNav from '../components/AdminSideNav';
 
 
 
@@ -72,7 +74,8 @@ function Profile() {
       <NavBar />
       <Box height={30} />
       <Box sx={{ display: 'flex' }}>
-        <DonorSideNav />
+      {localStorage.getItem('user_type') === 'donor' ? <DonorSideNav /> :
+                    localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> : null}
         <Box component="main" sx={{ display: 'flex', justifyContent: 'flex-start', p: 1 }}>
           <FormContainer maxWidth="md">
             {/* --- */}

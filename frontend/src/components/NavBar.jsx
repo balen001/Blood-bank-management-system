@@ -184,7 +184,7 @@ export default function NavBar() {
           <div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>{notification}</div>
         </MenuItem>
       ))}
-      
+
 
 
       <Box display="flex" justifyContent="space-between">
@@ -198,7 +198,7 @@ export default function NavBar() {
         </MenuItem>
       </Box>
 
-      
+
     </Menu>
   );
 
@@ -291,6 +291,11 @@ export default function NavBar() {
               inputProps={{ 'aria-label': 'search' }}
             />
           </Search> */}
+
+          <Typography variant="h6" noWrap component="div">
+            Welcome {(localStorage.getItem('userName') || '').charAt(0).toUpperCase() + (localStorage.getItem('userName') || '').slice(1)} 
+          </Typography>
+
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
             {/* <IconButton size="large" aria-label="show 4 new mails" color="inherit">

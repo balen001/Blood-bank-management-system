@@ -1,7 +1,7 @@
 import React from 'react';
-import DonorSideNav from '../components/DonorSideNav';
+import DonorSideNav from '../../components/DonorSideNav';
 import Box from '@mui/material/Box';
-import NavBar from '../components/NavBar';
+import NavBar from '../../components/NavBar';
 import { Container, Typography, Grid, TextField, Button, MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
 import dayjs from 'dayjs';
@@ -11,8 +11,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
-import AdminSideNav from '../components/AdminSideNav';
-import PatientSideNav from '../components/PatientSideNav';
+import AdminSideNav from '../../components/AdminSideNav';
+import PatientSideNav from '../../components/PatientSideNav';
 
 
 
@@ -36,16 +36,16 @@ const genderOptions = [
 
 
 
-function Account() {
+function AddDoctor() {
 
   const [value, setValue] = React.useState(dayjs()); // the format is: '2024-04-17' Don't forget to make the initial value the birthday of the user
 
-  const [isFirstNameEditable, setIsFirstNameEditable] = useState(false);
-  const [isLastNameEditable, setIsLastNameEditable] = useState(false);
-  const [isBirthdateEditable, setIsBirthdateEditable] = useState(false);
-  const [isGenderEditable, setIsGenderEditable] = useState(false);
-  const [isEmailEditable, setIsEmailEditable] = useState(false);
-  const [isPhoneEditable, setIsPhoneEditable] = useState(false);
+  const [isFirstNameEditable, setIsFirstNameEditable] = useState(true);
+  const [isLastNameEditable, setIsLastNameEditable] = useState(true);
+  const [isBirthdateEditable, setIsBirthdateEditable] = useState(true);
+  const [isGenderEditable, setIsGenderEditable] = useState(true);
+  const [isEmailEditable, setIsEmailEditable] = useState(true);
+  const [isPhoneEditable, setIsPhoneEditable] = useState(true);
 
 
 
@@ -61,7 +61,7 @@ function Account() {
         <Box component="main" sx={{ display: 'flex', justifyContent: 'flex-start', p: 1 }}>
           <FormContainer maxWidth="md">
             <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-              General Information
+              Add Doctor
             </Typography>
             <Box mt={3}></Box>
             <Grid container spacing={3}>
@@ -74,14 +74,14 @@ function Account() {
                       disabled: !isFirstNameEditable,
                     }}
                   />
-                  <Button
+                  {/* <Button
                     startIcon={<EditIcon />}
                     // sx={{ ml: 1 }}
                     size="small"
                     onClick={() => setIsFirstNameEditable(isFirstNameEditable => !isFirstNameEditable)}
                     sx={{ width: '10px' }}
                   >
-                  </Button>
+                  </Button> */}
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -94,14 +94,14 @@ function Account() {
                       disabled: !isLastNameEditable,
                     }}
                   />
-                  <Button
+                  {/* <Button
                     startIcon={<EditIcon />}
                     // sx={{ ml: 1 }}
                     size="small"
                     onClick={() => setIsLastNameEditable(isLastNameEditable => !isLastNameEditable)}
                     sx={{ width: '10px' }}
                   >
-                  </Button>
+                  </Button> */}
 
                 </Box>
               </Grid>
@@ -121,14 +121,14 @@ function Account() {
                       />
                     </DemoContainer>
                   </LocalizationProvider>
-                  <Button
+                  {/* <Button
                     startIcon={<EditIcon />}
                     // sx={{ ml: 1 }}
                     size="small"
                     onClick={() => setIsBirthdateEditable(isBirthdateEditable => !isBirthdateEditable)}
                     sx={{ width: '10px' }}
                   >
-                  </Button>
+                  </Button> */}
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -147,14 +147,14 @@ function Account() {
                       </MenuItem>
                     ))}
                   </TextField>
-                  <Button
+                  {/* <Button
                     startIcon={<EditIcon />}
                     // sx={{ ml: 1 }}
                     size="small"
                     onClick={() => setIsGenderEditable(isGenderEditable => !isGenderEditable)}
                     sx={{ width: '10px' }}
                   >
-                  </Button>
+                  </Button> */}
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -164,14 +164,14 @@ function Account() {
                       disabled: !isEmailEditable,
                     }}
                   />
-                  <Button
+                  {/* <Button
                     startIcon={<EditIcon />}
                     // sx={{ ml: 1 }}
                     size="small"
                     onClick={() => setIsEmailEditable(isEmailEditable => !isEmailEditable)}
                     sx={{ width: '10px' }}
                   >
-                  </Button>
+                  </Button> */}
 
                 </Box>
               </Grid>
@@ -182,14 +182,14 @@ function Account() {
                       disabled: !isPhoneEditable,
                     }}
                   />
-                  <Button
+                  {/* <Button
                     startIcon={<EditIcon />}
                     // sx={{ ml: 1 }}
                     size="small"
                     onClick={() => setIsPhoneEditable(isPhoneEditable => !isPhoneEditable)}
                     sx={{ width: '10px' }}>
 
-                  </Button>
+                  </Button> */}
                 </Box>
 
               </Grid>
@@ -197,28 +197,29 @@ function Account() {
             </Grid>
             {/* ----- */}
 
-            <Button variant="contained" color="primary" sx={{ mt: 4 }}>
+            {/* <Button variant="contained" color="primary" sx={{ mt: 4 }}>
               Update
-            </Button>  {/* Note: required info's should not be left emptied if left empty then don't update the required info. Check database for that */}
+            </Button>   */}
+            {/* Note: required info's should not be left emptied if left empty then don't update the required info. Check database for that */}
 
 
             <Box mt={5}></Box>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={12}>
+              {/* <Grid item xs={12} sm={12}>
                 <Grid item xs={12} sm={5.84}>
                   <TextField fullWidth label="Current password" variant="outlined" placeholder="Type current password" type="password" />
                 </Grid>
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="New password" variant="outlined" placeholder="Type new password" type="password" />
+                <TextField fullWidth label="New password" variant="outlined" placeholder="password" type="password" />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField fullWidth label="Retype new Password" variant="outlined" placeholder="Retype new password" type="password" />
               </Grid>
             </Grid>
             <Button variant="contained" color="primary" sx={{ mt: 4 }}>
-              Change Password
+              Create Account
             </Button>
           </FormContainer>
         </Box>
@@ -232,7 +233,7 @@ function Account() {
   );
 }
 
-export default Account;
+export default AddDoctor;
 
 
 

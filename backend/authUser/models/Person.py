@@ -11,5 +11,5 @@ class Person(User):
 
 
 
-    class Meta:
-        abstract = True
+    # class Meta:
+    #     abstract = True

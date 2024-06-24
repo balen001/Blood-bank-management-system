@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Donor, Patient
+from .models import Donor, Patient, User
 from rest_framework import generics
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -30,13 +30,14 @@ class UserView(APIView):
 
             user = Donor.objects.get(email=request.query_params.get('email'))
 
-            return Response({'user_type': 'donor', 'userId': user.id})
+            return Response({'user_type': 'donor', 'userId': user.id, 'userName': user.first_name})
         elif Patient.objects.filter(email=request.query_params.get('email')).exists():
             user = Patient.objects.get(email=request.query_params.get('email'))
-            return Response({'user_type': 'patient' , 'userId': user.id})
-        else:
-            user = Patient.objects.get(email=request.query_params.get('email'))
-            return Response({'user_type': 'admin'})   #returns admin if its not donor or patient (be carefullll!)
+            return Response({'user_type': 'patient' , 'userId': user.id, 'userName': user.first_name})
+        elif User.objects.filter(email=request.query_params.get('email')).exists():
+            user = User.objects.get(email=request.query_params.get('email'))
+            if user.is_admin:
+                return Response({'user_type': 'admin','userId': user.id, 'userName': user.first_name})   
 
 
 
@@ -75,3 +76,6 @@ class CreatePersonView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
