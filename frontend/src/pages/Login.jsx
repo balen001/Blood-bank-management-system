@@ -95,6 +95,7 @@ export default function Login() {
             localStorage.setItem(ACCESS_TOKEN, response.data.access);
             localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
 
+
             // console.log(values);
             // console.log(values.email);
             // console.log(localStorage.getItem(ACCESS_TOKEN))

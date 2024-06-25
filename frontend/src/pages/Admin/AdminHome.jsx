@@ -2,8 +2,11 @@ import React from 'react';
 import NavBar from "../../components/NavBar";
 import AdminSideNav from "../../components/AdminSideNav";
 import ConfirmDialog from '../../components/ConfirmDialog';
+import ChangePassPopup from '../../components/ChangePassPopup';
+
 
 import { Box, Typography, Card, CardContent, Grid, Divider, IconButton, Button, Icon } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
@@ -15,35 +18,58 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants';
 
 import axios from 'axios';
 
 
 function AdminHome() {
 
-    const [data, setData] = useState([]); //data will be changed to users remember this
-    let users = [
-        // { id: 1, date: '1-10-2023', startTime: '12:00', endTime: '12:30' },
-        // { id: 2, date: '1-10-2023', startTime: '12:30', endTime: '1:00' }
 
-        { id: 1, email: 'hello@gma.com', userType: 'doctor' },
-        { id: 2, email: 'holoyy@gma.com', userType: 'receptionist' }
+    // let users = [
 
 
-    ];
+    //     { id: 1, email: 'hello@gma.com', userType: 'doctor', userHospital: 'Hospital 1'},
+    //     { id: 2, email: 'holoyy@gma.com', userType: 'receptionist' , userHospital: 'Hospital 2' },
 
-    //to fetch data from Django REST Framework
-    const fetchData = async (query) => {
-        try {
-            const response = await axios.get(`YOUR_DJANGO_BACKEND_URL?search=${query}`);
-            setData(response.data);
-        } catch (error) {
-            console.error("Failed to fetch data:", error);
-            // Handle error appropriately
-        }
-    };
+
+    // ];
+
+
+    const [users, setUsers] = useState([{}]);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/admin/users/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                // console.log("Fetched data:", data);
+                setUsers(data);
+
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    useEffect(() => {
+        console.log("Updated users:", users);
+    }, [users]);
+
+
 
 
     const [value, setValue] = React.useState(dayjs());
@@ -91,7 +117,17 @@ function AdminHome() {
 
     //-----------------------------------------------------------------------------------
 
+    const [isPopupOpen, setPopupOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
 
+    const handleOpenPopup = (user) => {
+        setSelectedUser(user);
+        setPopupOpen(true);
+    };
+
+    const handleClosePopup = () => {
+        setPopupOpen(false);
+    };
 
 
     return (
@@ -256,7 +292,7 @@ function AdminHome() {
                                             <Box display="flex" flexDirection="column" alignItems="center" >
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
-                                                    Start time
+                                                    Role
                                                 </Typography>
                                                 <Divider sx={{ width: '100%' }} />
                                                 <Box mt={1}></Box>
@@ -264,6 +300,23 @@ function AdminHome() {
 
                                                 <Typography variant="body1" component="div">
                                                     {user.userType}
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+
+
+                                        <Grid item xs={2.75}>
+                                            <Box display="flex" flexDirection="column" alignItems="center" >
+                                                <Box mt={2}></Box>
+                                                <Typography variant="h7" component="div" fontWeight="bold">
+                                                    Hospital
+                                                </Typography>
+                                                <Divider sx={{ width: '100%' }} />
+                                                <Box mt={1}></Box>
+
+
+                                                <Typography variant="body1" component="div">
+                                                    {user.userHospital}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -283,11 +336,14 @@ function AdminHome() {
 
                                                 </IconButton>
 
-                                                {/* <ConfirmDialog
-                                                    open={openDialog}
-                                                    onClose={handleClose}
-                                                    onConfirm={handleConfirm}
-                                                /> */}
+
+                                                <IconButton aria-label="edit" onClick={() => handleOpenPopup(user)} title='change password'>
+
+                                                    <EditIcon />
+
+                                                </IconButton>
+
+
 
                                             </Box>
 
@@ -301,7 +357,16 @@ function AdminHome() {
 
                 </Box>
             </Box>
+
+
+
+            {isPopupOpen && selectedUser && (
+                <ChangePassPopup open={isPopupOpen} user={selectedUser} onClose={handleClosePopup} />
+            )}
+
         </>
+
+
     )
 
 

@@ -113,6 +113,12 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
         return Patient.objects.create(**validated_data)
 
 
+#change password serializer for users
+class ChangePasswordSerializer(serializers.Serializer):
+    admin_email = serializers.CharField(max_length=128)
+    admin_password = serializers.CharField(max_length=128)
+    id = serializers.IntegerField()
+    password = serializers.CharField(max_length=128)
 
 #----------------------------------------Hospital-----------------------------
 

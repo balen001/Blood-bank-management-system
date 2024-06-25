@@ -1,14 +1,17 @@
 from django.shortcuts import render
-from .models import Donor, Patient, User, Hospital
+from .models import Donor, Patient, User, Hospital, Receptionist, Doctor
 from rest_framework import generics
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
+from .serializers import ChangePasswordSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth import authenticate
 
 from .serializers import MyTokenObtainPairSerializer
 
@@ -25,7 +28,7 @@ class UserView(APIView):
         # print(request)
         # print(request.query_params.get('email'))
         # print("3----------------------------------------------------------------------------3")
-        #user = request.user
+        # user = request.user
         if Donor.objects.filter(email=request.query_params.get('email')).exists():
 
             user = Donor.objects.get(email=request.query_params.get('email'))
@@ -33,13 +36,11 @@ class UserView(APIView):
             return Response({'user_type': 'donor', 'userId': user.id, 'userName': user.first_name})
         elif Patient.objects.filter(email=request.query_params.get('email')).exists():
             user = Patient.objects.get(email=request.query_params.get('email'))
-            return Response({'user_type': 'patient' , 'userId': user.id, 'userName': user.first_name})
+            return Response({'user_type': 'patient', 'userId': user.id, 'userName': user.first_name})
         elif User.objects.filter(email=request.query_params.get('email')).exists():
             user = User.objects.get(email=request.query_params.get('email'))
             if user.is_admin:
-                return Response({'user_type': 'admin','userId': user.id, 'userName': user.first_name})   
-
-
+                return Response({'user_type': 'admin', 'userId': user.id, 'userName': user.first_name})
 
 
 # class CreateDonorView(generics.CreateAPIView):
@@ -52,6 +53,96 @@ class UserView(APIView):
 #     serializer_class = PatientSerializer
 #     permission_classes = [AllowAny]
 
+
+class AllUsersView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        users = []
+
+        # get all doctors with their hospital names
+        doctors = Doctor.objects.select_related('hospital').values(
+            'id', 'email', 'first_name', 'last_name', 'hospital__name')
+        for doctor in doctors:
+            users.append({
+                'id': doctor['id'],
+                'email': doctor['email'],
+                'first_name': doctor['first_name'],
+                'last_name': doctor['last_name'],
+                'userType': 'doctor',
+                'userHospital': doctor['hospital__name']
+            })
+
+        # get all receptionists with their hospital names
+        receptionists = Receptionist.objects.select_related('hospital').values(
+            'id', 'email', 'first_name', 'last_name', 'hospital__name')
+        for receptionist in receptionists:
+            users.append({
+                'id': receptionist['id'],
+                'email': receptionist['email'],
+                'first_name': receptionist['first_name'],
+                'last_name': receptionist['last_name'],
+                'userType': 'receptionist',
+                'userHospital': receptionist['hospital__name']
+            })
+
+        # get all patients
+        patients = Patient.objects.all().values(
+            'id', 'email', 'first_name', 'last_name')
+        for patient in patients:
+            users.append({
+                'id': patient['id'],
+                'email': patient['email'],
+                'userType': 'patient',
+                'first_name': patient['first_name'],
+                'last_name': patient['last_name'],
+                'userHospital': 'Nan'
+            })
+
+        # get all donors
+        donors = Donor.objects.all().values('id', 'email', 'first_name', 'last_name')
+        for donor in donors:
+            users.append({
+                'id': donor['id'],
+                'email': donor['email'],
+                'first_name': donor['first_name'],
+                'last_name': donor['last_name'],
+                'userType': 'donor',
+                'userHospital': 'Nan'
+            })
+
+        return Response(users, status=status.HTTP_200_OK)
+
+
+# change password view
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAdminUser]
+    def post(self, request, *args, **kwargs):
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            admin_email = serializer.validated_data['admin_email']
+            admin_password = serializer.validated_data['admin_password']
+            user_id = serializer.validated_data['id']
+            new_password = serializer.validated_data['password']
+            
+            # Authenticate admin (superuser) by email
+            admin = authenticate(request, username=admin_email, password=admin_password)
+            if not admin or not admin.is_superuser:
+                return Response({'error': 'Invalid admin credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            
+            # Retrieve the user instance (assuming it's managed by Django's User model)
+            user = get_object_or_404(User, id=user_id)
+            
+            # Set the new password
+            user.set_password(new_password)
+            user.save()
+
+            return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Create person view
 class CreatePersonView(APIView):
     permission_classes = [AllowAny]
 
@@ -94,22 +185,17 @@ class HospitalView(APIView):
 
     def get(self, request):
 
-
         hospitals = Hospital.objects.all().values('id', 'name')
 
         if (hospitals):
             return Response(list(hospitals), status=status.HTTP_200_OK)
 
-        
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
 
         # [{"id":17,"name":"Rizgary"}]               // retrieval data
 
 
-
-
-#-----------------------Receptionist-----------------------
+# -----------------------Receptionist-----------------------
 class AddReceptionistView(APIView):
     permission_classes = [IsAdminUser]
 
@@ -123,8 +209,7 @@ class AddReceptionistView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-#----------------------Doctor----------------------------------
+# ----------------------Doctor----------------------------------
 
 class AddDoctorView(APIView):
     permission_classes = [IsAdminUser]
@@ -134,7 +219,6 @@ class AddDoctorView(APIView):
         # print(request.data)
         serializer = AddDoctorSerializer(data=request.data)
 
-
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -142,7 +226,7 @@ class AddDoctorView(APIView):
 
 
 # {
-    
+
 #             "first_name": "Rebin",
 #             "last_name": "Ahmed",
 #             "email": "rebin@gmail.com",
@@ -152,5 +236,5 @@ class AddDoctorView(APIView):
 #             "gender": "Male",
 #             "speciality": "BDS",
 #             "hospital": 17
-    
+
 #     }
