@@ -2,6 +2,7 @@
 
 from .User import User
 from .Person import Person
+from .Doctor import Doctor
 from .Donor import Donor
 from .Patient import Patient
 from .Hospital import Hospital

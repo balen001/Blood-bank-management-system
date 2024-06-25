@@ -15,6 +15,7 @@ import Account from './pages/Account'
 import Notifications from './pages/Notifications'
 import AddReceptionist from './pages/Admin/AddReceptionist'
 import AddDoctor from './pages/Admin/AddDoctor'
+import AddHospital from './pages/Admin/AddHospital'
 
 
 function Logout() {
@@ -46,6 +47,7 @@ function App() {
         <Route path="/notifications" element={<ProtectedRoute><Notifications/></ProtectedRoute>} />
         <Route path="/addReceptionist" element={<ProtectedRoute><AddReceptionist/></ProtectedRoute>} />
         <Route path="/addDoctor" element={<ProtectedRoute><AddDoctor/></ProtectedRoute>} />
+        <Route path="/addHospital" element={<ProtectedRoute><AddHospital/></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
 
       </Routes>

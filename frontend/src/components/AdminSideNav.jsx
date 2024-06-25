@@ -20,6 +20,8 @@ import Person2Icon from '@mui/icons-material/Person2';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import HistoryIcon from '@mui/icons-material/History';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+
 
 
 import {useNavigate} from 'react-router-dom';
@@ -204,6 +206,29 @@ export default function AdminSideNav() {
                   <HistoryIcon />
                 </PersonAddIcon>
                 <ListItemText primary="Add receptionist" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+            </ListItem>
+
+            {/* Add hospital */}
+
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/addHospital')}>
+              <ListItemButton
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
+                }}
+              >
+                <LocalHospitalIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <HistoryIcon />
+                </LocalHospitalIcon>
+                <ListItemText primary="Add hospital" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
             </ListItem>
 

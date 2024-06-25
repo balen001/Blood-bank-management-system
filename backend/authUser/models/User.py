@@ -51,7 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('email'), max_length=150, unique=True, null=False, blank=False)
     password = models.CharField(max_length=100, null=False, blank=False)
     contact_no = models.CharField(max_length=15, unique=True, null=True, blank=True)
-    address = models.CharField(max_length=200)  # We need to change it address, city and zip OR {into JSON} OR {we can save it all like address | city | zip} JSON is better ig
+    address = models.CharField(max_length=200, blank=True, null=True)  # We need to change it address, city and zip OR {into JSON} OR {we can save it all like address | city | zip} JSON is better ig
     dateOfBirth = models.DateField(null=True)
     gender = models.CharField(max_length=10)
     is_active = models.BooleanField(default=True)

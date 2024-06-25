@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from .models import Donor, Patient, User
+from .models import Donor, Patient, User, Hospital
 from rest_framework import generics
-from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -41,7 +41,6 @@ class UserView(APIView):
 
 
 
-# Create your views here.
 
 # class CreateDonorView(generics.CreateAPIView):
 #     queryset = Donor.objects.all()
@@ -78,4 +77,80 @@ class CreatePersonView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class AddHospitalView(APIView):
+    permission_classes = [IsAdminUser]
 
+    def post(self, request, format=None):
+        print(request.data)
+        serializer = AddHospitalSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HospitalView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+
+        hospitals = Hospital.objects.all().values('id', 'name')
+
+        if (hospitals):
+            return Response(list(hospitals), status=status.HTTP_200_OK)
+
+        
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+        # [{"id":17,"name":"Rizgary"}]               // retrieval data
+
+
+
+
+#-----------------------Receptionist-----------------------
+class AddReceptionistView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, format=None):
+        # print("from view: ")
+        # print(request.data)
+        serializer = AddReceptionistSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+#----------------------Doctor----------------------------------
+
+class AddDoctorView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, format=None):
+        # print("from view: ")
+        # print(request.data)
+        serializer = AddDoctorSerializer(data=request.data)
+
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# {
+    
+#             "first_name": "Rebin",
+#             "last_name": "Ahmed",
+#             "email": "rebin@gmail.com",
+#             "password": "Slaw@1212",
+#             "contact_no": "+96475027515363",
+#             "dateOfBirth": "2000-01-01",
+#             "gender": "Male",
+#             "speciality": "BDS",
+#             "hospital": 17
+    
+#     }

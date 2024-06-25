@@ -1,12 +1,8 @@
-from .models import Donor, Patient
+from .models import Donor, Patient, Hospital, Receptionist, Doctor
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.hashers import make_password
 
-
-
-import logging
-logger = logging.getLogger(__name__)
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -21,8 +17,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         print("Validating user credentials for token creation...")
         data = super().validate(attrs)
 
-        
-
         print(f"User {self.user.email} authenticated, creating tokens...")
         refresh = self.get_token(self.user)
 
@@ -32,6 +26,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['is_admin'] = self.user.is_admin
 
         return data
+
 
 class DonorRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -71,18 +66,15 @@ class DonorRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])
-        #print("Creating Donor..: " + str(validated_data)) 
+        # print("Creating Donor..: " + str(validated_data))
         return Donor.objects.create(**validated_data)
-
-        
-
-
 
 
 class PatientRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'contact_no', 'dateOfBirth', 'gender', 'bloodType', 'emergencyContact', 'diseases', 'allergies']
+        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'contact_no',
+                  'dateOfBirth', 'gender', 'bloodType', 'emergencyContact', 'diseases', 'allergies']
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},  # it should at least receive ''
@@ -94,7 +86,7 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
             'bloodType': {'required': True},
             'emergencyContact': {'required': False},
             'diseases': {'required': False},
-            
+
 
         }
 
@@ -117,8 +109,164 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])
-        #print("Creating Patient..: " + str(validated_data)) 
+        # print("Creating Patient..: " + str(validated_data))
         return Patient.objects.create(**validated_data)
+
+
+
+#----------------------------------------Hospital-----------------------------
+
+#Hospital adding serializer
+class AddHospitalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hospital
+        fields = ['id', 'name',  'contact_no', 'city']
+        extra_kwargs = {
+            'name': {'required': True},
+            'contact_no': {'required': True},
+            'city': {'required': True},
+
+        }
+
+    def create(self, validated_data):
+        # print("Creating Hospital..: " + str(validated_data))
+        return Hospital.objects.create(**validated_data)
+
+
+
+
+
+
+
+
+
+
+#-------------------------------------------Receptionist----------------------------------
+# Receptionist serializer
+class AddReceptionistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Receptionist
+        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'contact_no', 'dateOfBirth',
+                  'gender', 'hospital']
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True},  # it should at least receive ''
+            'email': {'required': True},
+            'password': {'write_only': True},
+            'contact_no': {'required': False},
+            'dateOfBirth': {'required': False},  # 'dateOfBirth': '2000-01-01
+            'gender': {'required': True},
+            'hospital': {'required': True},
+            'is_staff': {'default': True, 'required': False},
+
+        }
+
+    def create(self, validated_data):
+
+        print("from create: ")
+        print(validated_data)
+
+        
+
+
+        validated_data['password'] = make_password(
+            validated_data.get('password'))
+
+
+        validated_data['is_staff'] = True
+
+        # print("Creating Receptionist..: " + str(validated_data))
+        return Receptionist.objects.create(**validated_data)
+    
+
+
+# {
+    
+#             "first_name": "Balen",
+#             "last_name": "Ahmed",
+#             "email": "receptionist@gmail.com",
+#             "password": "Slaw@1212",
+#             "contact_no": "+9647503068963",
+#             "dateOfBirth": "2000-01-01",
+#             "gender": "Male",
+#             "hospital": 17    //Remember 17 is a number NOT string!!!!!!!!!!!!!!!!!!!!!!!
+    
+#     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+#-------------------------------------------Doctor-------------------------
+
+
+
+class AddDoctorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Doctor
+        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'contact_no', 'dateOfBirth',
+                  'gender', 'speciality' ,'hospital']
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True},  # it should at least receive ''
+            'email': {'required': True},
+            'password': {'write_only': True},
+            'contact_no': {'required': False},
+            'dateOfBirth': {'required': False},  # 'dateOfBirth': '2000-01-01
+            'gender': {'required': True},
+            'hospital': {'required': True},
+            'speciality': {'required': True},
+            'is_staff': {'default': True, 'required': False},
+
+        }
+
+    def create(self, validated_data):
+
+        print("from create doctor ser: ")
+        print(validated_data)
+
+        
+
+
+        validated_data['password'] = make_password(
+            validated_data.get('password'))
+
+
+        validated_data['is_staff'] = True
+
+        # print("Creating Receptionist..: " + str(validated_data))
+        return Doctor.objects.create(**validated_data)
+
+
+# {
+    
+#             "first_name": "Rebin",
+#             "last_name": "Ahmed",
+#             "email": "rebin@gmail.com",
+#             "password": "Slaw@1212",
+#             "contact_no": "+96475027515363",
+#             "dateOfBirth": "2000-01-01",
+#             "gender": "Male",
+#             "speciality": "BDS",
+#             "hospital": 17        //Remember 17 is a number NOT string!!!!!!!!!!!!!!!!!!!!!!!
+    
+# }
+
+
+
+
+
+
+
+
 
 
 
@@ -158,5 +306,5 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
 
     # def create(self, validated_data):
     #     validated_data['password'] = make_password(validated_data['password'])
-    #     #print("Creating Admin..: " + str(validated_data)) 
+    #     #print("Creating Admin..: " + str(validated_data))
     #     return Admin.objects.create(**validated_data)
