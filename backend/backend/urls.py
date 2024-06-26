@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from authUser.views import CreatePersonView, UserView, AddHospitalView, AddReceptionistView, AddDoctorView, HospitalView, AllUsersView
-from authUser.views import ChangePasswordView
+from authUser.views import ChangePasswordView, UpdateSuperUserView, SuperuserDetailView, ChangeSuperuserPasswordView, DeleteUserView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
 
@@ -19,4 +19,9 @@ urlpatterns = [
     path('api/user/hospitals/', HospitalView.as_view(), name='get_hospitals'),
     path('api/admin/users/', AllUsersView.as_view(), name='get_all_users'),
     path('api/admin/changeuserpassword/', ChangePasswordView.as_view(), name='change_user_password'),
+    path('api/admin/updateadmin/', UpdateSuperUserView.as_view(), name='update_admin'),
+    path('api/admin/getsuperuser/', SuperuserDetailView.as_view(), name='superuser_detail'),
+    path('api/admin/changesuperuserpassword/', ChangeSuperuserPasswordView.as_view(), name='change_superuser_password'),
+    path('api/admin/deleteuser/', DeleteUserView.as_view(), name='delete_user'),
+
 ]

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import Donor, Patient, User, Hospital, Receptionist, Doctor
 from rest_framework import generics
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
-from .serializers import ChangePasswordSerializer
+from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,8 +12,12 @@ from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password
 
 from .serializers import MyTokenObtainPairSerializer
+
+User = get_user_model()
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -114,10 +118,11 @@ class AllUsersView(APIView):
         return Response(users, status=status.HTTP_200_OK)
 
 
-# change password view
+# change other users password view (only for superuser)
 
 class ChangePasswordView(APIView):
     permission_classes = [IsAdminUser]
+
     def post(self, request, *args, **kwargs):
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -125,21 +130,107 @@ class ChangePasswordView(APIView):
             admin_password = serializer.validated_data['admin_password']
             user_id = serializer.validated_data['id']
             new_password = serializer.validated_data['password']
-            
+
             # Authenticate admin (superuser) by email
-            admin = authenticate(request, username=admin_email, password=admin_password)
+            admin = authenticate(
+                request, username=admin_email, password=admin_password)
             if not admin or not admin.is_superuser:
                 return Response({'error': 'Invalid admin credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-            
+
             # Retrieve the user instance (assuming it's managed by Django's User model)
             user = get_object_or_404(User, id=user_id)
-            
+
             # Set the new password
             user.set_password(new_password)
             user.save()
 
             return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#delete user view
+class DeleteUserView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        user_id = request.data.get('user_id')
+
+        if not user_id:
+            return Response({'error': 'User ID is required in the request body.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the user instance or return 404 if not found
+        user = get_object_or_404(User, id=user_id)
+
+        # Delete the user
+        user.delete()
+
+        return Response({'message': f'User has been deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+# Superuser detail view
+class SuperuserDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Retrieve the superuser
+        superuser = User.objects.filter(is_superuser=True).first()
+
+        # Serialize the superuser data
+        serializer = SuperuserSerializer(superuser)
+
+        return Response(serializer.data)
+
+
+
+
+# Update superuser view
+
+class UpdateSuperUserView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def put(self, request, *args, **kwargs):
+        user = request.user
+
+        if not user.is_superuser:
+            return Response({'error': 'Only superusers can update their information'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = SuperUserUpdateSerializer(
+            user, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# Change superuser password view
+class ChangeSuperuserPasswordView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ChangeSuperuserPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            current_password = serializer.validated_data['current_password']
+            new_password = serializer.validated_data['new_password']
+            
+            User = get_user_model()
+            superuser = User.objects.filter(is_superuser=True).first()
+            
+            if not superuser:
+                return Response({'error': 'Superuser not found.'}, status=status.HTTP_404_NOT_FOUND)
+            
+            if not check_password(current_password, superuser.password):
+                return Response({'error': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            superuser.set_password(new_password)
+            superuser.save()
+            
+            return Response({'message': 'Superuser password changed successfully.'}, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 # Create person view

@@ -14,7 +14,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AdminSideNav from '../../components/AdminSideNav';
 import PatientSideNav from '../../components/PatientSideNav';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants';
-import {Snackbar } from '@mui/material';
+import { Snackbar } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import { redirect } from 'react-router-dom';
 
@@ -68,12 +68,12 @@ function AddReceptionist() {
   const [open, setOpen] = useState(false);
 
   const handleClose = (event, reason) => {
-      if (reason === 'clickaway') {
-          return;
-      }
+    if (reason === 'clickaway') {
+      return;
+    }
 
-      setOpen(false);
-      
+    setOpen(false);
+
   };
 
 
@@ -109,15 +109,15 @@ function AddReceptionist() {
         }
         const data = await response.json();
         // console.log("Fetched data:", data);
-        setHospitalOptions(data); 
-        
+        setHospitalOptions(data);
+
       } catch (error) {
         console.error('Error fetching hospitals:', error);
       }
     };
 
     fetchHospitals();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     console.log("Updated hospitalOptions:", hospitalOptions);
@@ -145,7 +145,7 @@ function AddReceptionist() {
 
 
     // console.log(receptionistData)
-    if (password === confirmPassword){
+    if (password === confirmPassword) {
 
       try {
         const response = await fetch('http://127.0.0.1:8000/api/admin/addreceptionist/', {
@@ -156,20 +156,20 @@ function AddReceptionist() {
           },
           body: JSON.stringify(receptionistData),
         });
-  
+
         if (response.ok) {
-  
+
           console.log("response ok")
           console.log(response.data)
-  
+
           // setOpen(true);
           const creationData = await response.json();
           message = "Account created successfully"
           setOpen(true);
 
           setTimeout(() => window.location.reload(), 5000);  //refresh on success
-          
-  
+
+
         } else {
           // Handle errors (e.g., show error message)
           setOpen(true);
@@ -180,7 +180,7 @@ function AddReceptionist() {
         setOpen(true);
         message = error;
         console.error('Error:', error);
-        
+
         // Handle request error (e.g., show error message)
       }
 
@@ -188,8 +188,9 @@ function AddReceptionist() {
     }
 
     else {
-      setOpen(true);
       message = 'Passwords don\'t match.';
+      setOpen(true);
+      
     }
 
   };
@@ -203,15 +204,15 @@ function AddReceptionist() {
 
 
 
-    // Handle change for password field
-    const handlePasswordChange = (event) => {
-      setPassword(event.target.value);
-    };
-  
-    // Handle change for confirm password field
-    const handleConfirmPasswordChange = (event) => {
-      setConfirmPassword(event.target.value);
-    };
+  // Handle change for password field
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value);
+  };
+
+  // Handle change for confirm password field
+  const handleConfirmPasswordChange = (event) => {
+    setConfirmPassword(event.target.value);
+  };
 
 
 
@@ -351,16 +352,16 @@ function AddReceptionist() {
             <Box mt={5}></Box>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="password" variant="outlined" placeholder="password" 
-                value={password}
-                onChange={handlePasswordChange}
-                type="password" />
+                <TextField fullWidth label="password" variant="outlined" placeholder="password"
+                  value={password}
+                  onChange={handlePasswordChange}
+                  type="password" />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField fullWidth label="Retype new Password" variant="outlined" placeholder="Retype new password" 
-                value={confirmPassword}
-                onChange={handleConfirmPasswordChange}
-                type="password" />
+                <TextField fullWidth label="Retype new Password" variant="outlined" placeholder="Retype new password"
+                  value={confirmPassword}
+                  onChange={handleConfirmPasswordChange}
+                  type="password" />
               </Grid>
             </Grid>
             <Button variant="contained" color="primary" sx={{ mt: 4 }} onClick={handleSubmit}>
@@ -375,23 +376,22 @@ function AddReceptionist() {
 
       <div>
 
+        {
 
-{
-
-    <Snackbar
-        open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-    >
-        <Alert onClose={handleClose} severity={message === "Account created successfully" ? 'success' : 'error'} sx={{ width: '100%' }}>
-            {message}
-        </Alert>
-    </Snackbar>
-}
+          <Snackbar
+            open={open}
+            autoHideDuration={6000}
+            onClose={handleClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          >
+            <Alert onClose={handleClose} severity={message === "Account created successfully" ? 'success' : 'error'} sx={{ width: '100%' }}>
+              {message}
+            </Alert>
+          </Snackbar>
+        }
 
 
-</div>
+      </div>
 
     </>
 

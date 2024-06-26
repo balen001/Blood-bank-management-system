@@ -27,6 +27,11 @@ import axios from 'axios';
 
 function AdminHome() {
 
+    const [searchQuery, setSearchQuery] = useState(''); // Added line
+    const [filteredUsers, setFilteredUsers] = useState([]); // Added line
+
+
+
 
     // let users = [
 
@@ -54,6 +59,8 @@ function AdminHome() {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
+                setFilteredUsers(data); // Added line
+
                 // console.log("Fetched data:", data);
                 setUsers(data);
 
@@ -70,6 +77,18 @@ function AdminHome() {
     }, [users]);
 
 
+    const handleSearch = () => { // Added function
+        if (searchQuery.trim() === '') {
+            setFilteredUsers(users); // Added line
+        } else {
+            const results = users.filter(user =>
+                `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            setFilteredUsers(results);
+        }
+    };
+
+
 
 
     const [value, setValue] = React.useState(dayjs());
@@ -77,7 +96,7 @@ function AdminHome() {
     //deletion operation
 
 
-    const handleDelete = () => {
+    const handleDelete = (user) => {
         Swal.fire({
             title: 'Are you sure?',
             text: 'You will not be able to recover this',
@@ -90,12 +109,61 @@ function AdminHome() {
             heightAuto: true
         }).then((result) => {
             if (result.isConfirmed) {
-                // handle confirm
+                const userId = user.id; 
+                console.log('User ID to delete:', userId);
+                const deleteData = {
+                    user_id: userId,
+                };
+                console.log('Delete data:', deleteData);
+    
+                const deleteUser = async () => {
+                    try {
+                        const response = await fetch('http://127.0.0.1:8000/api/admin/deleteuser/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+                            },
+                            body: JSON.stringify(deleteData),
+                        });
+    
+                        if (response.ok) {
+                            try {
+                                const data = await response.json();
+                                console.log("User deleted successfully:", data);
+                            } catch (e) {
+                                console.log("No JSON response, user deleted successfully.");
+                            }
+    
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'User has been deleted.',
+                                icon: 'success'
+                            }).then(() => {
+                                // Optionally, you can reload or update your UI after deletion
+                                window.location.reload(); // Example: Reload the page
+                            });
+                        } else {
+                            console.error('Failed to delete user');
+                            Swal.fire('Error!', 'Failed to delete user.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire('Error!', 'An error occurred.', 'error');
+                    }
+                };
+    
+                deleteUser(); // Call the async function
+    
             } else if (result.dismiss === Swal.DismissReason.cancel) {
                 // handle cancel
+                
+                console.log("User delete canceled");
             }
-        })
-    }
+        });
+    };
+    
+    
 
 
 
@@ -119,6 +187,7 @@ function AdminHome() {
 
     const [isPopupOpen, setPopupOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+
 
     const handleOpenPopup = (user) => {
         setSelectedUser(user);
@@ -155,18 +224,7 @@ function AdminHome() {
 
                     <Grid item xs={3} alignItems="center">
                         <Box display="flex" justifyContent="flex-end">
-                            {/* <Typography variant="h7" component="div" fontWeight="bold" gutterBottom ml={1}>
-                                Search by ID
-                            </Typography> */}
 
-                            {/* <Button startIcon={<AddIcon />} sx={{
-                                backgroundColor: '#04AA6D', color: 'white', '&:hover': {
-                                    backgroundColor: '#038253',
-                                }
-                            }}>
-
-                                Set an user
-                            </Button> */}
 
 
                         </Box>
@@ -184,46 +242,15 @@ function AdminHome() {
 
                             <Box mr={2}></Box>
                             <Box display="flex" alignItems="center">
-                                {/* <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                    <DemoContainer components={['DatePicker', 'DatePicker']}>
-                                        <DatePicker
 
-                                            label="from"
-                                            value={value}
-                                            onChange={(newValue) => setValue(newValue)}
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider> */}
 
                                 <TextField
                                     label="Search"
                                     variant="outlined"
-                                    onChange={(e) => { //be carefulllllllllllllll hereeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-                                        const query = e.target.value;
-                                        fetchData(query); // Call fetchData with the search query
-                                    }}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </Box>
 
-                            {/* <Box mr={1}>
-                                <Box mt={1}></Box>
-                                <Typography variant="h7" component="div" fontWeight="bold" gutterBottom ml={1}>
-                                    to
-                                </Typography>
-                            </Box> */}
-
-                            {/* <Box display="flex" alignItems="center">
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                    <DemoContainer components={['DatePicker', 'DatePicker']}>
-                                        <DatePicker
-
-                                            label="to"
-                                            value={value}
-                                            onChange={(newValue) => setValue(newValue)}
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </Box> */}
 
 
                             <Box mr={3}></Box>
@@ -238,9 +265,7 @@ function AdminHome() {
                                     marginTop: '10px',
                                 }}
 
-                                    onClick={() => {
-                                        // Search logic here
-                                    }}
+                                    onClick={handleSearch}
 
                                 >
                                     Search
@@ -255,11 +280,11 @@ function AdminHome() {
                     <Box mt={5}></Box>
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', flexWrap: 'wrap' }}>
-                        {users.map((user) => (
+                        {filteredUsers.map((user) => (
                             <Card variant="outlined" style={{ margin: '5px', width: '100%' }} key={user.id}>
                                 <CardContent>
                                     <Grid container spacing={2} alignItems="center">
-                                        <Grid item xs={2.75} alignItems="center">
+                                        {/* <Grid item xs={2.75} alignItems="center">
                                             <Box display="flex" flexDirection="column" alignItems="center">
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
@@ -269,6 +294,21 @@ function AdminHome() {
                                                 <Box mt={1}></Box>
                                                 <Typography variant="body1" component="div">
                                                     {user.id}
+                                                </Typography>
+                                            </Box>
+                                        </Grid> */}
+
+                                        <Grid item xs={2.75} alignItems="center">
+                                            <Box display="flex" flexDirection="column" alignItems="center">
+                                                <Box mt={2}></Box>
+                                                <Typography variant="h7" component="div" fontWeight="bold">
+                                                    Name
+                                                </Typography>
+                                                <Divider sx={{ width: '100%' }} />
+                                                <Box mt={1}></Box>
+
+                                                <Typography variant="body1" component="div">
+                                                    {user.first_name} {user.last_name}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -331,7 +371,7 @@ function AdminHome() {
                                                 <Divider sx={{ width: '100%' }} /> */}
                                                 {/* <Box mt={1}></Box> */}
 
-                                                <IconButton aria-label="delete" onClick={handleDelete} title='Delete user'>
+                                                <IconButton aria-label="delete" onClick={() => handleDelete(user)} title='Delete user'>
                                                     <DeleteIcon />
 
                                                 </IconButton>

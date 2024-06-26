@@ -142,7 +142,7 @@ export default function AdminSideNav() {
 
             {/* My Profile */}
 
-            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/profile')}>
+            {/* <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/myprofile')}>
               <ListItemButton
                 sx={{
                   minHeight: 48,
@@ -161,7 +161,7 @@ export default function AdminSideNav() {
                 </ListItemIcon>
                 <ListItemText primary="My Profile" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
-            </ListItem>
+            </ListItem> */}
 
             {/* Appointments */}
 

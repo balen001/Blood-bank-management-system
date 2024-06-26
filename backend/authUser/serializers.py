@@ -2,6 +2,7 @@ from .models import Donor, Patient, Hospital, Receptionist, Doctor
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -119,6 +120,37 @@ class ChangePasswordSerializer(serializers.Serializer):
     admin_password = serializers.CharField(max_length=128)
     id = serializers.IntegerField()
     password = serializers.CharField(max_length=128)
+
+
+#change password serializer for Superuser
+class ChangeSuperuserPasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(max_length=128)
+    new_password = serializers.CharField(max_length=128)
+
+
+#change account serializer for admin
+User = get_user_model()
+class SuperUserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'contact_no']
+        extra_kwargs = {
+            'email': {'required': False},
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'contact_no': {'required': False},
+            
+        }
+
+
+#retrieve detail of superuser serializer
+
+User = get_user_model()
+
+class SuperuserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'contact_no']
 
 #----------------------------------------Hospital-----------------------------
 

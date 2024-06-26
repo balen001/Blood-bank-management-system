@@ -74,8 +74,8 @@ function Profile() {
       <NavBar />
       <Box height={30} />
       <Box sx={{ display: 'flex' }}>
-      {localStorage.getItem('user_type') === 'donor' ? <DonorSideNav /> :
-                    localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> : null}
+        {localStorage.getItem('user_type') === 'donor' ? <DonorSideNav /> :
+          localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> : null}
         <Box component="main" sx={{ display: 'flex', justifyContent: 'flex-start', p: 1 }}>
           <FormContainer maxWidth="md">
             {/* --- */}
@@ -145,10 +145,15 @@ function Profile() {
 
             {/* medical information */}
 
+
+
+
+
             <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
               Medical information
             </Typography>
             <Box mt={3}></Box>
+
             <Grid container spacing={3}>
               <Grid item xs={12} sm={8}>
                 <Box display="flex" alignItems="center">
@@ -225,7 +230,13 @@ function Profile() {
                   </Button>
                 </Box>
               </Grid>
+
             </Grid>
+
+
+
+
+
 
             <Button variant="contained" color="primary" sx={{ mt: 4 }}>
               {/* you should check if mandatory fields are empty or not before allowing to save. */}

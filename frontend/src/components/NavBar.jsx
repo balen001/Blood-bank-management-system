@@ -21,6 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 
+
 const AppBar = styled(MuiAppBar, {
 
 })(({ theme }) => ({
@@ -140,8 +141,21 @@ export default function NavBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={() => { navigate("/profile") }}>Profile</MenuItem>
-      <MenuItem onClick={() => { navigate("/account") }}>My account</MenuItem>
+      {/* if its admin hide it */}
+      {localStorage.getItem('user_type') != 'admin' && (
+        <MenuItem onClick={() => { navigate("/profile") }}>Profile</MenuItem>
+      )}
+
+      {/* change the url based on user_type */}
+      <MenuItem onClick={() => {
+        const isAdmin = localStorage.getItem('user_type') === 'admin';
+        if (isAdmin) {
+          navigate("/myaccount");
+        } else {
+          navigate("/account");
+        }
+      }}>My account</MenuItem>
+
       <MenuItem onClick={() => { navigate("/logout") }}>Logout</MenuItem>
     </Menu>
   );
@@ -293,7 +307,7 @@ export default function NavBar() {
           </Search> */}
 
           <Typography variant="h6" noWrap component="div">
-            Welcome {(localStorage.getItem('userName') || '').charAt(0).toUpperCase() + (localStorage.getItem('userName') || '').slice(1)} 
+            Welcome {(localStorage.getItem('userName') || '').charAt(0).toUpperCase() + (localStorage.getItem('userName') || '').slice(1)}
           </Typography>
 
           <Box sx={{ flexGrow: 1 }} />

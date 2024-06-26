@@ -16,6 +16,8 @@ import Notifications from './pages/Notifications'
 import AddReceptionist from './pages/Admin/AddReceptionist'
 import AddDoctor from './pages/Admin/AddDoctor'
 import AddHospital from './pages/Admin/AddHospital'
+import StaffProfile from './pages/StaffProfile'
+import AdminAccount from './pages/Admin/AdminAccount'
 
 
 function Logout() {
@@ -39,11 +41,13 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/myprofile" element={<ProtectedRoute><StaffProfile/></ProtectedRoute>} />
         <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
         <Route path="/donationhistory" element={<ProtectedRoute><DonationHistory /></ProtectedRoute>} />
         <Route path="/transfusionhistory" element={<ProtectedRoute><TransfusionHistory /></ProtectedRoute>} />
         <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
         <Route path="/account" element={<ProtectedRoute><Account/></ProtectedRoute>} />
+        <Route path="/myaccount" element={<ProtectedRoute><AdminAccount/></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications/></ProtectedRoute>} />
         <Route path="/addReceptionist" element={<ProtectedRoute><AddReceptionist/></ProtectedRoute>} />
         <Route path="/addDoctor" element={<ProtectedRoute><AddDoctor/></ProtectedRoute>} />
