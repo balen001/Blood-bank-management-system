@@ -142,7 +142,7 @@ export default function NavBar() {
       onClose={handleMenuClose}
     >
       {/* if its admin or doctor hide it */}
-      {localStorage.getItem('user_type') !== 'admin' && localStorage.getItem('user_type') !== 'doctor' && (
+      {localStorage.getItem('user_type') !== 'admin' && localStorage.getItem('user_type') !== 'doctor' && localStorage.getItem('user_type') !== 'receptionist' && (
         <MenuItem onClick={() => { navigate("/profile") }}>Profile</MenuItem>
       )}
 
@@ -259,9 +259,11 @@ export default function NavBar() {
         <p>Notifications</p>
       </MenuItem>
 
-      {localStorage.getItem('user_type') !== 'admin' && localStorage.getItem('user_type') !== 'doctor' && (
+      
         { renderNotificationsMenu }
-      )}
+      
+
+      
 
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
@@ -324,7 +326,7 @@ export default function NavBar() {
             </IconButton> */}
 
 
-            {localStorage.getItem('user_type') !== 'admin' && localStorage.getItem('user_type') !== 'doctor' && (
+            {localStorage.getItem('user_type') !== 'admin' && localStorage.getItem('user_type') !== 'doctor' && localStorage.getItem('user_type') !== 'receptionist' && (
               <IconButton
                 size="large"
                 aria-label="show 17 new notifications"

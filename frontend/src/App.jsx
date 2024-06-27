@@ -21,6 +21,8 @@ import AdminAccount from './pages/Admin/AdminAccount'
 import ParticipantsPage from './pages/Doctor/ParticipantsPage'
 import PatientRequests from './pages/Doctor/PatientRequests'
 import AddBlood from './pages/Doctor/AddBlood'
+import RegisterDonor from './pages/Receptionist/RegisterDonor'
+import RegisterPatient from './pages/Receptionist/RegisterPatient'
 
 
 function Logout() {
@@ -55,6 +57,8 @@ function App() {
         <Route path="/addReceptionist" element={<ProtectedRoute><AddReceptionist/></ProtectedRoute>} />
         <Route path="/addDoctor" element={<ProtectedRoute><AddDoctor/></ProtectedRoute>} />
         <Route path="/addHospital" element={<ProtectedRoute><AddHospital/></ProtectedRoute>} />
+        <Route path="/registerdonor" element={<ProtectedRoute><RegisterDonor/></ProtectedRoute>} />
+        <Route path="/registerpatient" element={<ProtectedRoute><RegisterPatient/></ProtectedRoute>} />
         <Route path="/requests" element={<ProtectedRoute><PatientRequests/></ProtectedRoute>} />
         <Route path="/participants" element={<ProtectedRoute><ParticipantsPage/></ProtectedRoute>} />
         <Route path="/addblood" element={<ProtectedRoute><AddBlood/></ProtectedRoute>} />

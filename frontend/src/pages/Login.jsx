@@ -136,6 +136,11 @@ export default function Login() {
                     
                     navigate("/home", { state: { user_type: 'doctor', userId: res.data.userId, userName: res.data.userName } });
                 }
+
+                else if (res.data.user_type === 'receptionist'){
+                    
+                    navigate("/home", { state: { user_type: 'receptionist', userId: res.data.userId, userName: res.data.userName } });
+                }
                 
             }).catch(error => {
                 console.error('There was an error!', error);

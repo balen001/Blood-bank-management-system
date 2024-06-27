@@ -47,6 +47,10 @@ class UserView(APIView):
             user = Doctor.objects.get(email=request.query_params.get('email'))
             return Response({'user_type': 'doctor', 'userId': user.id, 'userName': user.first_name})
         
+        elif Receptionist.objects.filter(email=request.query_params.get('email')).exists():
+            user = Receptionist.objects.get(email=request.query_params.get('email'))
+            return Response({'user_type': 'receptionist', 'userId': user.id, 'userName': user.first_name})
+        
         elif User.objects.filter(email=request.query_params.get('email')).exists():
             user = User.objects.get(email=request.query_params.get('email'))
             if user.is_admin:

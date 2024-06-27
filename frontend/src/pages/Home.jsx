@@ -3,6 +3,7 @@ import DonorHome from './Donor/DonorHome';
 import PatientHome from './Patient/PatientHome';
 import AdminHome from './Admin/AdminHome';
 import DoctorHome from './Doctor/DoctorHome';
+import ReceptionistHome from './Receptionist/ReceptionistHome';
 
 
 function Home() {
@@ -36,6 +37,9 @@ function Home() {
     }
     else if (user_type === 'doctor') {
         return <DoctorHome />;
+    }
+    else if (user_type === 'receptionist') {
+        return <ReceptionistHome/>;
     }
 
     // Return a default component or null if user_type is not 'donor' or 'patient'
