@@ -13,6 +13,7 @@ import NavBar from '../components/NavBar';
 import DonorSideNav from '../components/DonorSideNav';
 import PatientSideNav from '../components/PatientSideNav';
 import AdminSideNav from '../components/AdminSideNav';
+import DoctorSideNav from '../components/DoctorSideNav';
 
 
 // Sample data
@@ -54,7 +55,8 @@ function About() {
             <Box height={30} />
             <Box sx={{ display: 'flex' }}>
             {localStorage.getItem('user_type') === 'donor' ? <DonorSideNav /> :
-                    localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> : null}
+                    localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> : 
+                    localStorage.getItem('user_type') === 'doctor' ? <DoctorSideNav /> :null}
                 <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                     <Box height={25}></Box>
                     <Typography variant="h3" component="h3" align="center" gutterBottom>

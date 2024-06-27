@@ -2,12 +2,12 @@ import React from 'react';
 import NavBar from "../../components/NavBar";
 import AdminSideNav from "../../components/AdminSideNav";
 import ConfirmDialog from '../../components/ConfirmDialog';
-import ChangePassPopup from '../../components/ChangePassPopup';
+import RequestDetailPopup from '../../components/RequestDetailPopup';
 
 
 import { Box, Typography, Card, CardContent, Grid, Divider, IconButton, Button, Icon } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import TextField from '@mui/material/TextField';
@@ -17,15 +17,17 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants';
 
 import axios from 'axios';
+import DoctorSideNav from '../../components/DoctorSideNav';
 
 
-function AdminHome() {
+function PatientRequests() {
 
     const [searchQuery, setSearchQuery] = useState(''); // Added line
     const [filteredUsers, setFilteredUsers] = useState([]); // Added line
@@ -99,23 +101,23 @@ function AdminHome() {
     const handleDelete = (user) => {
         Swal.fire({
             title: 'Are you sure?',
-            text: 'You will not be able to recover this',
+            text: 'You will not be able undo this!',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
+            confirmButtonText: 'Yes, reject it!',
             confirmButtonColor: 'red',
             cancelButtonText: 'No, keep it',
             width: '400px',
             heightAuto: true
         }).then((result) => {
             if (result.isConfirmed) {
-                const userId = user.id; 
+                const userId = user.id;
                 console.log('User ID to delete:', userId);
                 const deleteData = {
                     user_id: userId,
                 };
                 console.log('Delete data:', deleteData);
-    
+
                 const deleteUser = async () => {
                     try {
                         const response = await fetch('http://127.0.0.1:8000/api/admin/deleteuser/', {
@@ -126,7 +128,7 @@ function AdminHome() {
                             },
                             body: JSON.stringify(deleteData),
                         });
-    
+
                         if (response.ok) {
                             try {
                                 const data = await response.json();
@@ -134,7 +136,7 @@ function AdminHome() {
                             } catch (e) {
                                 console.log("No JSON response, user deleted successfully.");
                             }
-    
+
                             Swal.fire({
                                 title: 'Deleted!',
                                 text: 'User has been deleted.',
@@ -152,18 +154,18 @@ function AdminHome() {
                         Swal.fire('Error!', 'An error occurred.', 'error');
                     }
                 };
-    
+
                 deleteUser(); // Call the async function
-    
+
             } else if (result.dismiss === Swal.DismissReason.cancel) {
                 // handle cancel
-                
+
                 console.log("User delete canceled");
             }
         });
     };
-    
-    
+
+
     //-----------------------------------------------------------------------------------
 
     const [isPopupOpen, setPopupOpen] = useState(false);
@@ -186,14 +188,14 @@ function AdminHome() {
             <NavBar />
             <Box height={30} />
             <Box sx={{ display: 'flex' }}>
-                {localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> : null}
+                {localStorage.getItem('user_type') === 'doctor' ? <DoctorSideNav /> : null}
                 <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
 
 
                     <Box height={60}></Box>
 
                     <Typography variant="h4" component="h4" align="left" gutterBottom ml={1}>
-                        Users
+                        Patient requests
                     </Typography>
                     <Box mt={5}></Box>
 
@@ -283,22 +285,7 @@ function AdminHome() {
                                             <Box display="flex" flexDirection="column" alignItems="center">
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
-                                                    Name
-                                                </Typography>
-                                                <Divider sx={{ width: '100%' }} />
-                                                <Box mt={1}></Box>
-
-                                                <Typography variant="body1" component="div">
-                                                    {user.first_name} {user.last_name}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-
-                                        <Grid item xs={2.75} alignItems="center">
-                                            <Box display="flex" flexDirection="column" alignItems="center">
-                                                <Box mt={2}></Box>
-                                                <Typography variant="h7" component="div" fontWeight="bold">
-                                                    Email
+                                                    Date
                                                 </Typography>
                                                 <Divider sx={{ width: '100%' }} />
                                                 <Box mt={1}></Box>
@@ -309,18 +296,34 @@ function AdminHome() {
                                             </Box>
                                         </Grid>
 
-                                        <Grid item xs={2.75}>
-                                            <Box display="flex" flexDirection="column" alignItems="center" >
+                                        <Grid item xs={2.75} alignItems="center">
+                                            <Box display="flex" flexDirection="column" alignItems="center">
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
-                                                    Role
+                                                    Patient name
                                                 </Typography>
                                                 <Divider sx={{ width: '100%' }} />
                                                 <Box mt={1}></Box>
 
+                                                <Typography variant="body1" component="div">
+                                                    {user.first_name} {user.last_name}
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+
+
+
+                                        <Grid item xs={2.75} alignItems="center">
+                                            <Box display="flex" flexDirection="column" alignItems="center">
+                                                <Box mt={2}></Box>
+                                                <Typography variant="h7" component="div" fontWeight="bold">
+                                                    Patient email
+                                                </Typography>
+                                                <Divider sx={{ width: '100%' }} />
+                                                <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.userType}
+                                                    {user.email}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -330,7 +333,7 @@ function AdminHome() {
                                             <Box display="flex" flexDirection="column" alignItems="center" >
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
-                                                    Hospital
+                                                    Status
                                                 </Typography>
                                                 <Divider sx={{ width: '100%' }} />
                                                 <Box mt={1}></Box>
@@ -352,15 +355,15 @@ function AdminHome() {
                                                 <Divider sx={{ width: '100%' }} /> */}
                                                 {/* <Box mt={1}></Box> */}
 
-                                                <IconButton aria-label="delete" onClick={() => handleDelete(user)} title='Delete user'>
-                                                    <DeleteIcon />
+                                                {/* <IconButton aria-label="delete" onClick={() => handleDelete(user)} title='Delete user'>
+                                                    <CancelIcon />
 
-                                                </IconButton>
+                                                </IconButton> */}
 
 
                                                 <IconButton aria-label="edit" onClick={() => handleOpenPopup(user)} title='change password'>
 
-                                                    <EditIcon />
+                                                    <VisibilityIcon />
 
                                                 </IconButton>
 
@@ -382,7 +385,7 @@ function AdminHome() {
 
 
             {isPopupOpen && selectedUser && (
-                <ChangePassPopup open={isPopupOpen} user={selectedUser} onClose={handleClosePopup} />
+                <RequestDetailPopup open={isPopupOpen} user={selectedUser} onClose={handleClosePopup} />
             )}
 
         </>
@@ -393,4 +396,4 @@ function AdminHome() {
 
 }
 
-export default AdminHome;
+export default PatientRequests;

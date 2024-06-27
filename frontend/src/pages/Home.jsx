@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 import DonorHome from './Donor/DonorHome';
 import PatientHome from './Patient/PatientHome';
 import AdminHome from './Admin/AdminHome';
+import DoctorHome from './Doctor/DoctorHome';
 
 
 function Home() {
@@ -32,6 +33,9 @@ function Home() {
         return <PatientHome />;
     } else if (user_type === 'admin') {
         return <AdminHome />;
+    }
+    else if (user_type === 'doctor') {
+        return <DoctorHome />;
     }
 
     // Return a default component or null if user_type is not 'donor' or 'patient'

@@ -2,7 +2,6 @@ import React from 'react';
 import NavBar from "../../components/NavBar";
 import AdminSideNav from "../../components/AdminSideNav";
 import ConfirmDialog from '../../components/ConfirmDialog';
-import ChangePassPopup from '../../components/ChangePassPopup';
 
 
 import { Box, Typography, Card, CardContent, Grid, Divider, IconButton, Button, Icon } from "@mui/material";
@@ -17,18 +16,21 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants';
 
 import axios from 'axios';
+import DoctorSideNav from '../../components/DoctorSideNav';
+import ViewPatientDetailsPopup from '../../components/ViewPatientDetailsPopup';
 
 
-function AdminHome() {
+function ParticipantsPage() {
 
-    const [searchQuery, setSearchQuery] = useState(''); // Added line
-    const [filteredUsers, setFilteredUsers] = useState([]); // Added line
+    const [searchQuery, setSearchQuery] = useState(''); 
+    const [filteredUsers, setFilteredUsers] = useState([]);
 
 
 
@@ -186,14 +188,14 @@ function AdminHome() {
             <NavBar />
             <Box height={30} />
             <Box sx={{ display: 'flex' }}>
-                {localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> : null}
+                {localStorage.getItem('user_type') === 'doctor' ? <DoctorSideNav /> : null}
                 <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
 
 
                     <Box height={60}></Box>
 
                     <Typography variant="h4" component="h4" align="left" gutterBottom ml={1}>
-                        Users
+                        Participants
                     </Typography>
                     <Box mt={5}></Box>
 
@@ -352,15 +354,15 @@ function AdminHome() {
                                                 <Divider sx={{ width: '100%' }} /> */}
                                                 {/* <Box mt={1}></Box> */}
 
-                                                <IconButton aria-label="delete" onClick={() => handleDelete(user)} title='Delete user'>
+                                                {/* <IconButton aria-label="delete" onClick={() => handleDelete(user)} title='Delete user'>
                                                     <DeleteIcon />
 
-                                                </IconButton>
+                                                </IconButton> */}
 
 
                                                 <IconButton aria-label="edit" onClick={() => handleOpenPopup(user)} title='change password'>
 
-                                                    <EditIcon />
+                                                    <VisibilityIcon />
 
                                                 </IconButton>
 
@@ -382,7 +384,7 @@ function AdminHome() {
 
 
             {isPopupOpen && selectedUser && (
-                <ChangePassPopup open={isPopupOpen} user={selectedUser} onClose={handleClosePopup} />
+                <ViewPatientDetailsPopup open={isPopupOpen} user={selectedUser} onClose={handleClosePopup} />
             )}
 
         </>
@@ -393,4 +395,4 @@ function AdminHome() {
 
 }
 
-export default AdminHome;
+export default ParticipantsPage;

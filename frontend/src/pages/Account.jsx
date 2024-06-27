@@ -13,6 +13,7 @@ import { useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import AdminSideNav from '../components/AdminSideNav';
 import PatientSideNav from '../components/PatientSideNav';
+import DoctorSideNav from '../components/DoctorSideNav';
 
 
 
@@ -57,7 +58,8 @@ function Account() {
       <Box height={30} />
       <Box sx={{ display: 'flex' }}>
       {localStorage.getItem('user_type') === 'donor' ? <DonorSideNav /> :
-                    localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> : null}
+                    localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> :
+                    localStorage.getItem('user_type') === 'doctor' ? <DoctorSideNav /> : null}
         <Box component="main" sx={{ display: 'flex', justifyContent: 'flex-start', p: 1 }}>
           <FormContainer maxWidth="md">
             <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>

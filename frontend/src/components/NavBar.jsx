@@ -141,8 +141,8 @@ export default function NavBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      {/* if its admin hide it */}
-      {localStorage.getItem('user_type') != 'admin' && (
+      {/* if its admin or doctor hide it */}
+      {localStorage.getItem('user_type') !== 'admin' && localStorage.getItem('user_type') !== 'doctor' && (
         <MenuItem onClick={() => { navigate("/profile") }}>Profile</MenuItem>
       )}
 
@@ -258,6 +258,11 @@ export default function NavBar() {
         </IconButton>
         <p>Notifications</p>
       </MenuItem>
+
+      {localStorage.getItem('user_type') !== 'admin' && localStorage.getItem('user_type') !== 'doctor' && (
+        { renderNotificationsMenu }
+      )}
+
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
           size="large"
@@ -317,17 +322,24 @@ export default function NavBar() {
                 <MailIcon />
               </Badge>
             </IconButton> */}
-            <IconButton
-              size="large"
-              aria-label="show 17 new notifications"
-              color="inherit"
-              // Added onClick handler to open notifications menu
-              onClick={handleNotificationsMenuOpen}
-            >
-              <Badge badgeContent={17} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+
+
+            {localStorage.getItem('user_type') !== 'admin' && localStorage.getItem('user_type') !== 'doctor' && (
+              <IconButton
+                size="large"
+                aria-label="show 17 new notifications"
+                color="inherit"
+                // Added onClick handler to open notifications menu
+                onClick={handleNotificationsMenuOpen}
+              >
+                <Badge badgeContent={17} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            )}
+
+
+
 
             <IconButton
               size="large"
@@ -359,6 +371,10 @@ export default function NavBar() {
       {renderMenu}
       {/* Added notifications menu */}
       {renderNotificationsMenu}
+      {/* {localStorage.getItem('user_type') !== 'admin' && localStorage.getItem('user_type') !== 'doctor' && (
+        { renderNotificationsMenu }
+      )} */}
+
     </Box>
   );
 }

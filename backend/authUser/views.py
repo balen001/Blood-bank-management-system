@@ -4,6 +4,7 @@ from rest_framework import generics
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
 from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from .permissions import IsSuperUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -41,10 +42,17 @@ class UserView(APIView):
         elif Patient.objects.filter(email=request.query_params.get('email')).exists():
             user = Patient.objects.get(email=request.query_params.get('email'))
             return Response({'user_type': 'patient', 'userId': user.id, 'userName': user.first_name})
+        
+        elif Doctor.objects.filter(email=request.query_params.get('email')).exists():
+            user = Doctor.objects.get(email=request.query_params.get('email'))
+            return Response({'user_type': 'doctor', 'userId': user.id, 'userName': user.first_name})
+        
         elif User.objects.filter(email=request.query_params.get('email')).exists():
             user = User.objects.get(email=request.query_params.get('email'))
             if user.is_admin:
                 return Response({'user_type': 'admin', 'userId': user.id, 'userName': user.first_name})
+            
+        
 
 
 # class CreateDonorView(generics.CreateAPIView):
@@ -59,7 +67,7 @@ class UserView(APIView):
 
 
 class AllUsersView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]   #later change it to IsSuperUser
 
     def get(self, request):
         users = []
@@ -121,7 +129,7 @@ class AllUsersView(APIView):
 # change other users password view (only for superuser)
 
 class ChangePasswordView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsSuperUser]
 
     def post(self, request, *args, **kwargs):
         serializer = ChangePasswordSerializer(data=request.data)
@@ -150,7 +158,7 @@ class ChangePasswordView(APIView):
 
 #delete user view
 class DeleteUserView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsSuperUser]
 
     def post(self, request):
         user_id = request.data.get('user_id')
@@ -171,7 +179,7 @@ class DeleteUserView(APIView):
 
 # Superuser detail view
 class SuperuserDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsSuperUser]
 
     def get(self, request):
         # Retrieve the superuser
@@ -188,7 +196,7 @@ class SuperuserDetailView(APIView):
 # Update superuser view
 
 class UpdateSuperUserView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsSuperUser]
 
     def put(self, request, *args, **kwargs):
         user = request.user
@@ -208,6 +216,9 @@ class UpdateSuperUserView(APIView):
 
 # Change superuser password view
 class ChangeSuperuserPasswordView(APIView):
+
+    permission_classes = [IsSuperUser]
+
     def post(self, request, *args, **kwargs):
         serializer = ChangeSuperuserPasswordSerializer(data=request.data)
         if serializer.is_valid():
