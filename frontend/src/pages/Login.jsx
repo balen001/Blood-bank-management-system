@@ -124,22 +124,22 @@ export default function Login() {
                 console.log("returned data is:" + res.data)
 
                 if (res.data.user_type === 'donor') {
-                    navigate("/home", { state: { user_type: 'donor', userId: res.data.userId, userName: res.data.userName } });
+                    navigate("/home", { state: { user_type: 'donor', userId: res.data.userId, userName: res.data.userName, userEmail: res.data.userEmail } });
                 } else if (res.data.user_type === 'patient') {
                     console.log("--------before navigation :")
-                    navigate("/home", { state: { user_type: 'patient', userId: res.data.userId, userName: res.data.userName } });
+                    navigate("/home", { state: { user_type: 'patient', userId: res.data.userId, userName: res.data.userName, userEmail: res.data.userEmail } });
                 } else if (res.data.user_type === 'admin'){
                     
-                    navigate("/home", { state: { user_type: 'admin', userId: res.data.userId, userName: res.data.userName } });
+                    navigate("/home", { state: { user_type: 'admin', userId: res.data.userId, userName: res.data.userName, userEmail: res.data.userEmail } });
                 }
                 else if (res.data.user_type === 'doctor'){
                     
-                    navigate("/home", { state: { user_type: 'doctor', userId: res.data.userId, userName: res.data.userName } });
+                    navigate("/home", { state: { user_type: 'doctor', userId: res.data.userId, userName: res.data.userName, userEmail: res.data.userEmail } });
                 }
 
                 else if (res.data.user_type === 'receptionist'){
                     
-                    navigate("/home", { state: { user_type: 'receptionist', userId: res.data.userId, userName: res.data.userName } });
+                    navigate("/home", { state: { user_type: 'receptionist', userId: res.data.userId, userName: res.data.userName, userEmail: res.data.userEmail } });
                 }
                 
             }).catch(error => {

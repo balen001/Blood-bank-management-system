@@ -2,6 +2,7 @@ import React from 'react';
 import NavBar from "../../components/NavBar";
 import DonorSideNav from "../../components/DonorSideNav";
 import ConfirmDialog from '../../components/ConfirmDialog';
+import SetDonorAppointmentPopup from '../../components/SetDonorAppointmentPopup';
 
 import { Box, Typography, Card, CardContent, Grid, Divider, IconButton, Button, Icon } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -25,6 +26,9 @@ function DonorAppointments() {
 
 
     ];
+
+    const [isPopupOpen, setPopupOpen] = useState(false);
+    
 
 
     const [value, setValue] = React.useState(dayjs());
@@ -51,6 +55,19 @@ function DonorAppointments() {
             }
         })
     }
+
+
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+
+    const handleOpenPopup = () => {
+        setSelectedAppointment();
+        setPopupOpen(true);
+    };
+
+    const handleClosePopup = () => {
+        setPopupOpen(false);
+    };
 
 
 
@@ -108,7 +125,9 @@ function DonorAppointments() {
                                 backgroundColor: '#04AA6D', color: 'white', '&:hover': {
                                     backgroundColor: '#038253',
                                 }
-                            }}>
+                            }}
+                            onClick={() => handleOpenPopup()}
+                            >
 
                                 Set an appointment
                             </Button>
@@ -287,6 +306,10 @@ function DonorAppointments() {
 
                 </Box>
             </Box>
+
+            {isPopupOpen && (
+                <SetDonorAppointmentPopup open={isPopupOpen} onClose={handleClosePopup} personEmail={localStorage.getItem('userEmail')} />
+            )}
         </>
     )
 

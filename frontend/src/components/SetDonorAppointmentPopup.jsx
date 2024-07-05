@@ -12,10 +12,11 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import { ACCESS_TOKEN } from "../constants";
 
-const SetAppointmentPopup = ({ open, onClose }) => {
+const SetDonorAppointmentPopup = ({ open, onClose, personEmail }) => {
+
+    console.log("person email: ", personEmail)
     const [openMessage, setOpenMessage] = useState(false);
     const [message, setMessage] = useState("");
-    const [personEmail, setPersonEmail] = useState('');
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [timeSlots, setTimeSlots] = useState([
@@ -107,7 +108,6 @@ const SetAppointmentPopup = ({ open, onClose }) => {
             if (response.ok) {
                 setOpenMessage(true);
                 setMessage("Appointment set successfully");
-                setPersonEmail('');
                 setStartTime('');
                 setEndTime('');
             } else {
@@ -167,14 +167,6 @@ const SetAppointmentPopup = ({ open, onClose }) => {
 
                     <Box style={{ height: '10px' }} />
 
-                    <TextField
-                        variant="outlined"
-                        label="Enter user email"
-                        value={personEmail}
-                        onChange={(e) => setPersonEmail(e.target.value)}
-                        fullWidth
-                    />
-
                     <Box style={{ height: '5px' }} />
 
                     <Box style={{ height: '10px' }} />
@@ -199,4 +191,4 @@ const SetAppointmentPopup = ({ open, onClose }) => {
     );
 };
 
-export default SetAppointmentPopup;
+export default SetDonorAppointmentPopup;

@@ -1,10 +1,12 @@
 from django.shortcuts import render
-from .models import Donor, Patient, User, Hospital, Receptionist, Doctor
-from rest_framework import generics
+from .models import Donor, Patient, User, Hospital, Receptionist, Doctor, Appointment, Person
+from rest_framework import generics, serializers
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
-from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer
+from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer, AppointmentSerializer
+from .serializers import DateSerializer, TodayAppointmentSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from .permissions import IsSuperUser
+from .utils import convert_to_ampm
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,6 +17,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
+from django.utils import timezone
 
 from .serializers import MyTokenObtainPairSerializer
 
@@ -38,25 +41,24 @@ class UserView(APIView):
 
             user = Donor.objects.get(email=request.query_params.get('email'))
 
-            return Response({'user_type': 'donor', 'userId': user.id, 'userName': user.first_name})
+            return Response({'user_type': 'donor', 'userId': user.id, 'userName': user.first_name, 'userEmail': user.email})
         elif Patient.objects.filter(email=request.query_params.get('email')).exists():
             user = Patient.objects.get(email=request.query_params.get('email'))
-            return Response({'user_type': 'patient', 'userId': user.id, 'userName': user.first_name})
-        
+            return Response({'user_type': 'patient', 'userId': user.id, 'userName': user.first_name, 'userEmail': user.email})
+
         elif Doctor.objects.filter(email=request.query_params.get('email')).exists():
             user = Doctor.objects.get(email=request.query_params.get('email'))
-            return Response({'user_type': 'doctor', 'userId': user.id, 'userName': user.first_name})
-        
+            return Response({'user_type': 'doctor', 'userId': user.id, 'userName': user.first_name, 'userEmail': user.email})
+
         elif Receptionist.objects.filter(email=request.query_params.get('email')).exists():
-            user = Receptionist.objects.get(email=request.query_params.get('email'))
-            return Response({'user_type': 'receptionist', 'userId': user.id, 'userName': user.first_name})
-        
+            user = Receptionist.objects.get(
+                email=request.query_params.get('email'))
+            return Response({'user_type': 'receptionist', 'userId': user.id, 'userName': user.first_name, 'userEmail': user.email})
+
         elif User.objects.filter(email=request.query_params.get('email')).exists():
             user = User.objects.get(email=request.query_params.get('email'))
             if user.is_admin:
-                return Response({'user_type': 'admin', 'userId': user.id, 'userName': user.first_name})
-            
-        
+                return Response({'user_type': 'admin', 'userId': user.id, 'userName': user.first_name, 'userEmail': user.email})
 
 
 # class CreateDonorView(generics.CreateAPIView):
@@ -71,7 +73,7 @@ class UserView(APIView):
 
 
 class AllUsersView(APIView):
-    permission_classes = [IsAdminUser]   #later change it to IsSuperUser
+    permission_classes = [IsAdminUser]  # later change it to IsSuperUser
 
     def get(self, request):
         users = []
@@ -160,7 +162,7 @@ class ChangePasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#delete user view
+# delete user view
 class DeleteUserView(APIView):
     permission_classes = [IsSuperUser]
 
@@ -179,8 +181,6 @@ class DeleteUserView(APIView):
         return Response({'message': f'User has been deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
 
 
-
-
 # Superuser detail view
 class SuperuserDetailView(APIView):
     permission_classes = [IsSuperUser]
@@ -193,8 +193,6 @@ class SuperuserDetailView(APIView):
         serializer = SuperuserSerializer(superuser)
 
         return Response(serializer.data)
-
-
 
 
 # Update superuser view
@@ -217,7 +215,6 @@ class UpdateSuperUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 # Change superuser password view
 class ChangeSuperuserPasswordView(APIView):
 
@@ -228,24 +225,22 @@ class ChangeSuperuserPasswordView(APIView):
         if serializer.is_valid():
             current_password = serializer.validated_data['current_password']
             new_password = serializer.validated_data['new_password']
-            
+
             User = get_user_model()
             superuser = User.objects.filter(is_superuser=True).first()
-            
+
             if not superuser:
                 return Response({'error': 'Superuser not found.'}, status=status.HTTP_404_NOT_FOUND)
-            
+
             if not check_password(current_password, superuser.password):
                 return Response({'error': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             superuser.set_password(new_password)
             superuser.save()
-            
+
             return Response({'message': 'Superuser password changed successfully.'}, status=status.HTTP_200_OK)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 # Create person view
@@ -344,3 +339,74 @@ class AddDoctorView(APIView):
 #             "hospital": 17
 
 #     }
+
+
+# ----------------------Appointment----------------------------------
+
+#Everyone can set appointment change this later
+class AppointmentCreateView(generics.CreateAPIView):
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = AppointmentSerializer
+    queryset = Appointment.objects.all()
+
+    def perform_create(self, serializer):
+        
+        person = serializer.validated_data.pop('email', None)
+        if person:
+            serializer.save(person=person)
+        else:
+            raise serializers.ValidationError("Email is required.")
+
+   
+
+class TakenTimeslotsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = DateSerializer(data=request.data)
+        if serializer.is_valid():
+            date = serializer.validated_data['date']
+            appointments = Appointment.objects.filter(date=date)
+
+            taken_timeslots = []
+            for appointment in appointments:
+                start_time = convert_to_ampm(appointment.start_time)
+                end_time = convert_to_ampm(appointment.end_time)
+                taken_timeslots.append(f"{start_time} - {end_time}")
+
+            return Response(taken_timeslots, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    
+
+#to fetch todays appointments
+
+class TodayAppointmentsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        today = timezone.now().date()
+        appointments = Appointment.objects.filter(date=today)
+        serializer = TodayAppointmentSerializer(appointments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+#delete appointment
+
+class DeleteAppointmentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, appointment_id):
+        # Retrieve the appointment or return 404 if not found
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+
+        # Delete the appointment
+        appointment.delete()
+
+        return Response({'message': 'Appointment deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+    
+
+

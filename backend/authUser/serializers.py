@@ -1,8 +1,9 @@
-from .models import Donor, Patient, Hospital, Receptionist, Doctor
+from .models import Donor, Patient, Hospital, Receptionist, Doctor, Appointment, Person
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
+from datetime import datetime
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -114,7 +115,7 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
         return Patient.objects.create(**validated_data)
 
 
-#change password serializer for users
+# change password serializer for users
 class ChangePasswordSerializer(serializers.Serializer):
     admin_email = serializers.CharField(max_length=128)
     admin_password = serializers.CharField(max_length=128)
@@ -122,14 +123,16 @@ class ChangePasswordSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=128)
 
 
-#change password serializer for Superuser
+# change password serializer for Superuser
 class ChangeSuperuserPasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(max_length=128)
     new_password = serializers.CharField(max_length=128)
 
 
-#change account serializer for admin
+# change account serializer for admin
 User = get_user_model()
+
+
 class SuperUserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -139,22 +142,25 @@ class SuperUserUpdateSerializer(serializers.ModelSerializer):
             'first_name': {'required': False},
             'last_name': {'required': False},
             'contact_no': {'required': False},
-            
+
         }
 
 
-#retrieve detail of superuser serializer
+# retrieve detail of superuser serializer
 
 User = get_user_model()
+
 
 class SuperuserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'contact_no']
 
-#----------------------------------------Hospital-----------------------------
+# ----------------------------------------Hospital-----------------------------
 
-#Hospital adding serializer
+# Hospital adding serializer
+
+
 class AddHospitalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hospital
@@ -171,15 +177,7 @@ class AddHospitalSerializer(serializers.ModelSerializer):
         return Hospital.objects.create(**validated_data)
 
 
-
-
-
-
-
-
-
-
-#-------------------------------------------Receptionist----------------------------------
+# -------------------------------------------Receptionist----------------------------------
 # Receptionist serializer
 class AddReceptionistSerializer(serializers.ModelSerializer):
     class Meta:
@@ -204,22 +202,17 @@ class AddReceptionistSerializer(serializers.ModelSerializer):
         print("from create: ")
         print(validated_data)
 
-        
-
-
         validated_data['password'] = make_password(
             validated_data.get('password'))
-
 
         validated_data['is_staff'] = True
 
         # print("Creating Receptionist..: " + str(validated_data))
         return Receptionist.objects.create(**validated_data)
-    
 
 
 # {
-    
+
 #             "first_name": "Balen",
 #             "last_name": "Ahmed",
 #             "email": "receptionist@gmail.com",
@@ -228,30 +221,18 @@ class AddReceptionistSerializer(serializers.ModelSerializer):
 #             "dateOfBirth": "2000-01-01",
 #             "gender": "Male",
 #             "hospital": 17    //Remember 17 is a number NOT string!!!!!!!!!!!!!!!!!!!!!!!
-    
+
 #     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-#-------------------------------------------Doctor-------------------------
-
+# -------------------------------------------Doctor-------------------------
 
 
 class AddDoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
         fields = ['id', 'first_name', 'last_name', 'email', 'password', 'contact_no', 'dateOfBirth',
-                  'gender', 'speciality' ,'hospital']
+                  'gender', 'speciality', 'hospital']
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},  # it should at least receive ''
@@ -271,12 +252,8 @@ class AddDoctorSerializer(serializers.ModelSerializer):
         print("from create doctor ser: ")
         print(validated_data)
 
-        
-
-
         validated_data['password'] = make_password(
             validated_data.get('password'))
-
 
         validated_data['is_staff'] = True
 
@@ -285,7 +262,7 @@ class AddDoctorSerializer(serializers.ModelSerializer):
 
 
 # {
-    
+
 #             "first_name": "Rebin",
 #             "last_name": "Ahmed",
 #             "email": "rebin@gmail.com",
@@ -295,8 +272,108 @@ class AddDoctorSerializer(serializers.ModelSerializer):
 #             "gender": "Male",
 #             "speciality": "BDS",
 #             "hospital": 17        //Remember 17 is a number NOT string!!!!!!!!!!!!!!!!!!!!!!!
-    
+
 # }
+
+
+# -------------------------------------------Appointment-------------------------
+
+
+class TimeFieldAMPM(serializers.Field):
+    def to_representation(self, value):
+        # Convert 24-hour format to 12-hour format with AM/PM
+        return value.strftime('%I:%M %p')
+
+    def to_internal_value(self, data):
+        # Convert 12-hour format with AM/PM to 24-hour format
+        try:
+            return datetime.strptime(data, '%I:%M %p').time()
+        except ValueError:
+            raise serializers.ValidationError(
+                "Time must be in the format HH:MM AM/PM")
+
+
+class TimeFieldAMPM(serializers.Field):
+    def to_representation(self, value):
+        # Convert 24-hour format to 12-hour format with AM/PM
+        return value.strftime('%I:%M %p')
+
+    def to_internal_value(self, data):
+        # Convert 12-hour format with AM/PM to 24-hour format
+        try:
+            return datetime.strptime(data, '%I:%M %p').time()
+        except ValueError:
+            raise serializers.ValidationError(
+                "Time must be in the format HH:MM AM/PM")
+
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    start_time = TimeFieldAMPM()
+    end_time = TimeFieldAMPM()
+    email = serializers.EmailField(
+        write_only=True)  
+
+    class Meta:
+        model = Appointment
+        fields = ['id', 'date', 'start_time', 'end_time',
+                  'email']  
+
+    def validate_email(self, value):
+        try:
+            person = Person.objects.get(email=value)
+            return person
+        except Person.DoesNotExist:
+            raise serializers.ValidationError(
+                "Person with this email does not exist.")
+
+    # you can put this for testing
+    def validate(self, data):
+        # Ensure no overlapping appointments
+        date = data.get('date')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        person = self.validate_email(data.get('email'))
+
+        overlapping_appointments = Appointment.objects.filter(
+            date=date,
+            start_time__lte=end_time,
+            end_time__gte=start_time
+        ).exclude(id=self.instance.id if self.instance else None)
+
+        if overlapping_appointments.exists():
+            raise serializers.ValidationError(
+                "An appointment already exists for this time slot.")
+
+        data['person'] = person  # Add person to the validated data
+        return data
+
+
+class DateSerializer(serializers.Serializer):
+    date = serializers.DateField()
+
+
+
+
+#fetching todays appointments
+
+class TodayAppointmentSerializer(serializers.ModelSerializer):
+    person_first_name = serializers.CharField(source='person.first_name')
+    person_last_name = serializers.CharField(source='person.last_name')
+    person_id = serializers.IntegerField(source='person.id')
+    person_email = serializers.CharField(source='person.email')
+
+    class Meta:
+        model = Appointment
+        fields = ['id', 'date', 'start_time', 'end_time', 'person_first_name', 'person_last_name' , 'person_id', 'person_email']
+
+
+
+
+
+
+
+
+
 
 
 

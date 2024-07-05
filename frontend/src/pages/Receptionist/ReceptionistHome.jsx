@@ -31,7 +31,7 @@ import SetAppointmentPopup from '../../components/SetAppointmentPopup';
 function ReceptionistHome() {
 
     const [searchQuery, setSearchQuery] = useState(''); // Added line
-    const [filteredUsers, setFilteredUsers] = useState([]); // Added line
+    const [filteredAppointments, setFilteredAppointments] = useState([]); // Added line
 
 
 
@@ -46,12 +46,12 @@ function ReceptionistHome() {
     // ];
 
 
-    const [users, setUsers] = useState([{}]);
+    const [appointments, setAppointments] = useState([{}]);
 
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchAppointments = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/admin/users/', {
+                const response = await fetch('http://127.0.0.1:8000/api/appointments/today/', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -62,34 +62,41 @@ function ReceptionistHome() {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                setFilteredUsers(data); // Added line
+                setFilteredAppointments(data); // Added line
 
                 // console.log("Fetched data:", data);
-                setUsers(data);
+                setAppointments(data);
 
             } catch (error) {
-                console.error('Error fetching users:', error);
+                console.error('Error fetching appointments:', error);
             }
         };
 
-        fetchUsers();
+        fetchAppointments();
     }, []);
 
     useEffect(() => {
-        console.log("Updated users:", users);
-    }, [users]);
+        console.log("Updated appointments:", appointments);
+    }, [appointments]);
 
 
     const handleSearch = () => { // Added function
         if (searchQuery.trim() === '') {
-            setFilteredUsers(users); // Added line
+            setFilteredAppointments(appointments); // Added line
         } else {
-            const results = users.filter(user =>
-                `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
+            const results = appointments.filter(appointment =>
+                `${appointment.person_first_name} ${appointment.person_last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
             );
-            setFilteredUsers(results);
+            setFilteredAppointments(results);
         }
     };
+
+    function formatTime24To12(time24) {
+        const [hours, minutes] = time24.split(':');
+        const hours12 = ((hours + 11) % 12 + 1);
+        const amPm = hours >= 12 ? 'PM' : 'AM';
+        return `${hours12}:${minutes} ${amPm}`;
+      }
 
 
 
@@ -99,7 +106,7 @@ function ReceptionistHome() {
     //deletion operation
 
 
-    const handleDelete = (user) => {
+    const handleDelete = (appointment) => {
         Swal.fire({
             title: 'Are you sure?',
             text: 'You will not be able to recover this',
@@ -112,56 +119,45 @@ function ReceptionistHome() {
             heightAuto: true
         }).then((result) => {
             if (result.isConfirmed) {
-                const userId = user.id;
-                console.log('User ID to delete:', userId);
-                const deleteData = {
-                    user_id: userId,
-                };
-                console.log('Delete data:', deleteData);
-
-                const deleteUser = async () => {
+                const appointmentId = appointment.id;
+                console.log('Appointment ID to delete:', appointmentId);
+    
+                const deleteAppointment = async () => {
                     try {
-                        const response = await fetch('http://127.0.0.1:8000/api/admin/deleteuser/', {
-                            method: 'POST',
+                        
+                        const response = await fetch(`http://127.0.0.1:8000/api/deleteappointment/${appointmentId}/`, {
+                            method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
-                            },
-                            body: JSON.stringify(deleteData),
-                        });
-
-                        if (response.ok) {
-                            try {
-                                const data = await response.json();
-                                console.log("User deleted successfully:", data);
-                            } catch (e) {
-                                console.log("No JSON response, user deleted successfully.");
                             }
-
+                        });
+    
+                        if (response.ok) {
                             Swal.fire({
                                 title: 'Deleted!',
-                                text: 'User has been deleted.',
+                                text: 'Appointment has been deleted.',
                                 icon: 'success'
                             }).then(() => {
                                 // Optionally, you can reload or update your UI after deletion
                                 window.location.reload(); // Example: Reload the page
                             });
                         } else {
-                            console.error('Failed to delete user');
-                            Swal.fire('Error!', 'Failed to delete user.', 'error');
+                            console.error('Failed to delete appointment');
+                            Swal.fire('Error!', 'Failed to delete appointment.', 'error');
                         }
                     } catch (error) {
                         console.error('Error:', error);
                         Swal.fire('Error!', 'An error occurred.', 'error');
                     }
                 };
-
-                deleteUser(); // Call the async function
-
+    
+                deleteAppointment(); // Call the async function
+    
             } else if (result.dismiss === Swal.DismissReason.cancel) {
                 // handle cancel
-
-                console.log("User delete canceled");
+    
+                console.log("Appointment delete canceled");
             }
         });
     };
@@ -170,11 +166,11 @@ function ReceptionistHome() {
     //-----------------------------------------------------------------------------------
 
     const [isPopupOpen, setPopupOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
 
 
     const handleOpenPopup = () => {
-        setSelectedUser();
+        setSelectedAppointment();
         setPopupOpen(true);
     };
 
@@ -311,20 +307,20 @@ function ReceptionistHome() {
                     <Box mt={5}></Box>
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', flexWrap: 'wrap' }}>
-                        {filteredUsers.map((user) => (
-                            <Card variant="outlined" style={{ margin: '5px', width: '100%' }} key={user.id}>
+                        {filteredAppointments.map((appointment) => (
+                            <Card variant="outlined" style={{ margin: '5px', width: '100%' }} key={appointment.id}>
                                 <CardContent>
                                     <Grid container spacing={2} alignItems="center">
                                         <Grid item xs={2.75} alignItems="center">
                                             <Box display="flex" flexDirection="column" alignItems="center">
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
-                                                    ID
+                                                    User name
                                                 </Typography>
                                                 <Divider sx={{ width: '100%' }} />
                                                 <Box mt={1}></Box>
                                                 <Typography variant="body1" component="div">
-                                                    {user.id}
+                                                {appointment.person_first_name} {appointment.person_last_name}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -339,7 +335,7 @@ function ReceptionistHome() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.first_name}
+                                                    {appointment.date}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -355,7 +351,7 @@ function ReceptionistHome() {
 
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.last_name}
+                                                {appointment.start_time ? formatTime24To12(appointment.start_time) : "Time not available"}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -370,7 +366,7 @@ function ReceptionistHome() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.last_name}
+                                                {appointment.end_time ? formatTime24To12(appointment.end_time) : "Time not available"}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -384,7 +380,7 @@ function ReceptionistHome() {
                                             <Divider sx={{ width: '100%' }} /> */}
                                                 {/* <Box mt={1}></Box> */}
 
-                                                <IconButton aria-label="delete" onClick={handleDelete} title='Delete appointment'>
+                                                <IconButton aria-label="delete" onClick={() => handleDelete(appointment)} title='Delete appointment'>
                                                     <DeleteIcon />
 
                                                 </IconButton>

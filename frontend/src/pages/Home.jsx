@@ -11,6 +11,7 @@ function Home() {
     let user_type = location.state ? location.state.user_type : null;
     let userId = location.state ? location.state.userId : null;
     let userName = location.state ? location.state.userName : null;
+    let userEmail = location.state ? location.state.userEmail : null;
 
     
     console.log("user type is beforeee checking for homes: " + localStorage.getItem('user_type'))
@@ -19,11 +20,13 @@ function Home() {
         user_type = localStorage.getItem('user_type');
         userId = localStorage.getItem('userId');
         userName = localStorage.getItem('userName');
+        userName = localStorage.getItem('userEmail');
     } else {
         // If user_type is not null, store it in localStorage
         localStorage.setItem('user_type', user_type);
         localStorage.setItem('userId', userId);
         localStorage.setItem('userName', userName);
+        localStorage.setItem('userEmail', userEmail)
     }
 
     console.log("user type is before checking for homes: " + localStorage.getItem('user_type'))
