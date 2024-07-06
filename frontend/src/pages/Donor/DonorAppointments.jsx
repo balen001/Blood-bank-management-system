@@ -14,18 +14,49 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { ACCESS_TOKEN } from '../../constants';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
 
 function DonorAppointments() {
-    let appointments = [
-        { id: 1, date: '1-10-2023', startTime: '12:00', endTime: '12:30' },
-        { id: 2, date: '1-10-2023', startTime: '12:30', endTime: '1:00' }
 
 
-    ];
+    const [appointments, setAppointments] = useState([{}]);
+
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/donor/appointments/${localStorage.getItem('userId')}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                setAppointments(data); // Added line
+
+                console.log("Fetched data:", data);
+                setAppointments(data);
+
+            } catch (error) {
+                console.error('Error fetching appointments:', error);
+            }
+        };
+
+        fetchAppointments();
+    }, []);
+    // let appointments = [
+    //     { id: 1, date: '1-10-2023', startTime: '12:00', endTime: '12:30' },
+    //     { id: 2, date: '1-10-2023', startTime: '12:30', endTime: '1:00' }
+
+
+    // ];
 
     const [isPopupOpen, setPopupOpen] = useState(false);
     
@@ -36,24 +67,60 @@ function DonorAppointments() {
     //deletion operation
 
 
-    const handleDelete = () => {
+    const handleDelete = (appointment) => {
         Swal.fire({
             title: 'Are you sure?',
-            text: 'You will not be able to recover this imaginary file!',
+            text: 'You will not be able to recover this',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
+            confirmButtonText: 'Cancel the appointment',
             confirmButtonColor: 'red',
             cancelButtonText: 'No, keep it',
             width: '400px',
             heightAuto: true
         }).then((result) => {
             if (result.isConfirmed) {
-                // handle confirm
+                const appointmentId = appointment.id;
+                console.log('Appointment ID to delete:', appointmentId);
+    
+                const deleteAppointment = async () => {
+                    try {
+                        
+                        const response = await fetch(`http://127.0.0.1:8000/api/deleteappointment/${appointmentId}/`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+                            }
+                        });
+    
+                        if (response.ok) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Appointment has been deleted.',
+                                icon: 'success'
+                            }).then(() => {
+                                // Optionally, you can reload or update your UI after deletion
+                                window.location.reload(); // Example: Reload the page
+                            });
+                        } else {
+                            console.error('Failed to delete appointment');
+                            Swal.fire('Error!', 'Failed to delete appointment.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire('Error!', 'An error occurred.', 'error');
+                    }
+                };
+    
+                deleteAppointment(); // Call the async function
+    
             } else if (result.dismiss === Swal.DismissReason.cancel) {
                 // handle cancel
+    
+                console.log("Appointment delete canceled");
             }
-        })
+        });
     }
 
 
@@ -254,7 +321,7 @@ function DonorAppointments() {
 
 
                                                 <Typography variant="body1" component="div">
-                                                    {appointment.startTime}
+                                                    {appointment.start_time}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -269,7 +336,7 @@ function DonorAppointments() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {appointment.endTime}
+                                                    {appointment.end_time}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -283,7 +350,7 @@ function DonorAppointments() {
                                                 <Divider sx={{ width: '100%' }} /> */}
                                                 {/* <Box mt={1}></Box> */}
 
-                                                <IconButton aria-label="delete" onClick={handleDelete} title='Delete appointment'>
+                                                <IconButton aria-label="delete" onClick={() => handleDelete(appointment)} title='Delete appointment'>
                                                     <DeleteIcon />
 
                                                 </IconButton>

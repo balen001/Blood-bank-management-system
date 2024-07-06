@@ -59,8 +59,13 @@ let message = ''
 
 
 function DonorProfile() {
+
+
+
+
+
+
   const [loading, setLoading] = useState(true); // State to manage loading state
-  const [open, setOpen] = useState(false);
   const [userData, setUserData] = useState({
     address: '',
     city: '',
@@ -75,6 +80,10 @@ function DonorProfile() {
   const [isBloodEditable, setIsBloodEditable] = useState(false);
   const [isDiseaseEditable, setIsDiseaseEditable] = useState(false);
   const [isDisease2Editable, setIsDisease2Editable] = useState(false);
+
+
+
+  const [open, setOpen] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
@@ -316,7 +325,7 @@ function DonorProfile() {
 
       <Snackbar
         open={open}
-        autoHideDuration={6000}
+        autoHideDuration={5000}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >

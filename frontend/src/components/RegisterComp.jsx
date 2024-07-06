@@ -99,7 +99,7 @@ const RegisterComp = ({register_as}) => {
                         email: '',
                         gender: 'male',
                         bloodType: 'None',
-                        dob: '',
+                        dateOfBirth: '',
                         password: '',
                         confirmPassword: '',
                         contact_no: '',
@@ -156,7 +156,7 @@ const RegisterComp = ({register_as}) => {
                                     <MenuItem value="O-">O-</MenuItem>
                                 </TextField>
 
-                                <TextField size="small" name="dob" type="date" label="Date of Birth" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.dob} helperText={touched.dob ? errors.dob : ""} error={touched.dob && Boolean(errors.dob)} InputLabelProps={{ shrink: true }} />
+                                <TextField size="small" name="dateOfBirth" type="date" label="Date of Birth" fullWidth required onChange={handleChange} onBlur={handleBlur} value={values.dateOfBirth} helperText={touched.dateOfBirth ? errors.dateOfBirth : ""} error={touched.dateOfBirth && Boolean(errors.dateOfBirth)} InputLabelProps={{ shrink: true }} />
                                 {/* <TextField size="small" name="diseases" type="text" label="Diseases if any (optional)" fullWidth onChange={handleChange} onBlur={handleBlur} value={values.diseases} helperText={touched.diseases ? errors.diseases : ""} error={touched.diseases && Boolean(errors.diseases)} /> */}
 
 

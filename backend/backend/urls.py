@@ -4,6 +4,7 @@ from django.urls import path, include
 from authUser.views import CreatePersonView, UserView, AddHospitalView, AddReceptionistView, AddDoctorView, HospitalView, AllUsersView
 from authUser.views import ChangePasswordView, UpdateSuperUserView, SuperuserDetailView, ChangeSuperuserPasswordView, DeleteUserView, AppointmentCreateView
 from authUser.views import TakenTimeslotsView, TodayAppointmentsView, DeleteAppointmentView, DonorDetailView, UpdateDonorDetailsView, CreateDonationView
+from authUser.views import DonorAppointmentsListView, ChangeDonorPatientDoctorReceptionistPasswordView, UpdateUserAccountView, UserDetailView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
 
@@ -29,9 +30,11 @@ urlpatterns = [
     path('api/appointments/today/', TodayAppointmentsView.as_view(), name='today_appointments'),
     path('api/deleteappointment/<int:appointment_id>/', DeleteAppointmentView.as_view(), name='delete_appointment'),
     path('api/donor/<int:pk>/', DonorDetailView.as_view(), name='donor_detail'),
+    path('api/user/<int:pk>/', UserDetailView.as_view(), name='user_detail'),
     path('api/donor/updateprofile/<int:pk>/', UpdateDonorDetailsView.as_view(), name='donor_update_profile'),
+    path('api/user/updateuseraccount/<int:pk>/', UpdateUserAccountView.as_view(), name='update_user_account'),
     path('api/doctor/addblood/', CreateDonationView.as_view(), name='add_blood'),
-   
-
+    path('api/donor/appointments/<int:donor_id>/', DonorAppointmentsListView.as_view(), name='donor_appointments_list'),
+    path('api/user/changepassword/', ChangeDonorPatientDoctorReceptionistPasswordView.as_view(), name='change-donor-patient-password'),
 
 ]

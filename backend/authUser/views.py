@@ -3,7 +3,7 @@ from .models import Donor, Patient, User, Hospital, Receptionist, Doctor, Appoin
 from rest_framework import generics, serializers
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
 from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer, AppointmentSerializer
-from .serializers import DateSerializer, TodayAppointmentSerializer, DonorDetailSerializer
+from .serializers import DateSerializer, TodayAppointmentSerializer, PersonDetailSerializer, DonorAppointmentsSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from .permissions import IsSuperUser
 from .utils import convert_to_ampm
@@ -410,7 +410,13 @@ class DeleteAppointmentView(APIView):
     
 
 
+class DonorAppointmentsListView(generics.ListAPIView):
+    serializer_class = DonorAppointmentsSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        donor_id = self.kwargs['donor_id']  # assuming donor_id is passed as a URL parameter
+        return Appointment.objects.filter(person__id=donor_id).order_by('-date', '-start_time')
 
 
 #------------------------------donor-------------------------
@@ -419,16 +425,16 @@ class DonorDetailView(generics.RetrieveAPIView):
     parser_classes =[IsAuthenticated]
     
     queryset = Donor.objects.all()
-    serializer_class = DonorDetailSerializer
+    serializer_class = PersonDetailSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'pk' 
 
 
 
-
+#updates donor & patient but not receptionist and doctor
 class UpdateDonorDetailsView(generics.UpdateAPIView):
     queryset = Donor.objects.all()
-    serializer_class = DonorDetailSerializer
+    serializer_class = PersonDetailSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'pk'
 
@@ -441,6 +447,31 @@ class UpdateDonorDetailsView(generics.UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+
+class UserDetailView(generics.RetrieveAPIView):
+    parser_classes =[IsAuthenticated]
+    
+    queryset = User.objects.all()
+    serializer_class = PersonDetailSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk' 
+
+
+
+class UpdateUserAccountView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = PersonDetailSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+
+    def put(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CreateDonationView(APIView):
@@ -501,3 +532,46 @@ class CreateDonationView(APIView):
                 'time': donation_record.time
             }
         }, status=status.HTTP_201_CREATED)
+    
+
+
+#change donor/patient password
+
+
+class ChangeDonorPatientDoctorReceptionistPasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user_id = request.data.get('id')
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+
+        if not user_id or not current_password or not new_password:
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the user instance (Donor or Patient)
+        donor = Donor.objects.filter(id=user_id).first()
+        patient = Patient.objects.filter(id=user_id).first()
+        doctor = Doctor.objects.filter(id=user_id).first()
+        receptionist = Receptionist.objects.filter(id=user_id).first()
+
+        if donor:
+            user = donor
+        elif patient:
+            user = patient
+        elif receptionist:
+            user = receptionist
+        elif doctor:
+            user = doctor
+        else:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not check_password(current_password, user.password):
+            return Response({'error': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Set the new password
+        user.set_password(new_password)
+        user.save()
+
+        return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
+    

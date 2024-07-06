@@ -369,14 +369,22 @@ class TodayAppointmentSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = ['id', 'date', 'start_time', 'end_time', 'person_first_name',
                   'person_last_name', 'person_id', 'person_email']
+        
 
+
+class DonorAppointmentsSerializer(serializers.ModelSerializer):
+    start_time = TimeFieldAMPM()
+    end_time = TimeFieldAMPM()
+    class Meta:
+        model = Appointment
+        fields = ['id', 'date', 'start_time', 'end_time']
 
 # ------------------------------Donor-------------------------------------
 
 
-class DonorDetailSerializer(serializers.ModelSerializer):
+class PersonDetailSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Donor
+        model = Person
         # exclude = ['password']
         fields = ['id', 'first_name', 'last_name', 'email', 'diseases', 'gender',
                   'dateOfBirth', 'bloodType', 'emergencyContact', 'address',  'contact_no', 'city']
@@ -390,9 +398,28 @@ class DonorDetailSerializer(serializers.ModelSerializer):
             'dateOfBirth': {'required': False},
             'gender': {'required': False},
             'city': {'required': False},
+            'emergencyContact': {'required': False},
 
         }
 
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        # exclude = ['password']
+        fields = ['id', 'first_name', 'last_name', 'email', 'gender',
+                  'dateOfBirth', 'address',  'contact_no', 'city']
+
+        extra_kwargs = {
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'email': {'required': False},
+            'password': {'write_only': False},
+            'contact_no': {'required': False},
+            'dateOfBirth': {'required': False},
+            'gender': {'required': False},
+            'city': {'required': False},
+        
+        }
 
 
 
