@@ -52,6 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     password = models.CharField(max_length=100, null=False, blank=False)
     contact_no = models.CharField(max_length=15, unique=True, null=True, blank=True)
     address = models.CharField(max_length=200, blank=True, null=True)  # We need to change it address, city and zip OR {into JSON} OR {we can save it all like address | city | zip} JSON is better ig
+    city = models.CharField(max_length=200, blank=True, null=True)
     dateOfBirth = models.DateField(null=True)
     gender = models.CharField(max_length=10)
     is_active = models.BooleanField(default=True)

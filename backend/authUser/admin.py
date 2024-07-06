@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Donor, Patient, Hospital, Receptionist, Doctor, Notification, Blood_bag, Appointment
+from .models import User, Donor, Patient, Hospital, Receptionist, Doctor, Notification, Blood_bag, Appointment, Donation_record
 
 
 class UserAdminConfig(admin.ModelAdmin):
@@ -36,6 +36,7 @@ admin.site.register(Doctor)
 admin.site.register(Notification)
 admin.site.register(Blood_bag)
 admin.site.register(Appointment)
+admin.site.register(Donation_record)
 
 
 

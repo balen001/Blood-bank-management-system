@@ -47,6 +47,8 @@ const bloodOptions = [
 ];
 
 
+let message = ''
+
 
 
 
@@ -66,6 +68,12 @@ function AddBlood() {
     };
 
 
+
+
+    const [bloodType, setBloodType] = useState('');
+    const [email, setEmail] = useState('');
+    const [amount, setAmount] = useState('');
+    const [hospital, setHospital] = useState('');
 
 
 
@@ -106,22 +114,25 @@ function AddBlood() {
         e.preventDefault();
 
         const bloodData = {
-            name,
-            contact_no: contactNo,
-            city,
+            bloodType: bloodType,
+            amount: amount,
+            donorEmail: email,
+            hospital: hospital
         };
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/admin/addhospital/', {
+            const response = await fetch('http://127.0.0.1:8000/api/doctor/addblood/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
                 },
                 body: JSON.stringify(bloodData),
+                console: console.log("Stringifyed: ", JSON.stringify(bloodData))
             });
 
             if (response.ok) {
+                message = 'Blood added successfully'
                 setOpen(true);
                 const data = await response.json();
 
@@ -129,6 +140,9 @@ function AddBlood() {
                 // Handle success (e.g., clear form, show message)
             } else {
                 // Handle errors (e.g., show error message)
+                const errorResponse = await response.json();
+                message = errorResponse.error || 'Failed to add blood';
+                setOpen(true);
                 console.error('Failed to add blood');
             }
         } catch (error) {
@@ -140,10 +154,6 @@ function AddBlood() {
 
 
 
-
-    const [name, setName] = useState('');
-    const [contactNo, setContactNo] = useState('');
-    const [email, setEmail] = useState('');
 
 
 
@@ -168,11 +178,12 @@ function AddBlood() {
                                     <TextField fullWidth
                                         required
                                         // value={amount}  //We've set the default when we initialized it so we don't need this
-                                        onChange={(e) => setHospital(e.target.value)}
+
                                         label="Blood type"
                                         variant="outlined"
                                         defaultValue={""}
-
+                                        value={bloodType}
+                                        onChange={(e) => setBloodType(e.target.value)}
                                         select>
                                         {bloodOptions.map((option) => (
                                             <MenuItem key={option.value} value={option.value}>
@@ -191,7 +202,7 @@ function AddBlood() {
 
                                     <TextField fullWidth
                                         required
-                                        // value={amount}  //We've set the default when we initialized it so we don't need this
+                                        value={amount}  //we've set the default when we initialized it so we don't need this
                                         onChange={(e) => setAmount(e.target.value)}
                                         label="Amount"
                                         variant="outlined"
@@ -233,7 +244,7 @@ function AddBlood() {
 
                                     <TextField fullWidth
                                         required
-                                        // value={hospital}  //We've set the default when we initialized it so we don't need this
+                                        value={hospital}  //We've set the default when we initialized it so we don't need this
                                         onChange={(e) => setHospital(e.target.value)}
                                         label="Hospital"
                                         variant="outlined"
@@ -284,8 +295,8 @@ function AddBlood() {
                         onClose={handleClose}
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                     >
-                        <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
-                            successfuly added!
+                        <Alert onClose={handleClose} severity={open && message.includes('Blood added successfully') ? 'success' : 'error'} sx={{ width: '100%' }}>
+                            {message}
                         </Alert>
                     </Snackbar>
                 }

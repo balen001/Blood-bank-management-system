@@ -10,3 +10,4 @@ from .Receptionist import Receptionist
 from .Notification import Notification
 from .Blood_bag import Blood_bag
 from .Appointments import Appointment
+from .Donation_record import Donation_record

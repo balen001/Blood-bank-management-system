@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.urls import path, include
 from authUser.views import CreatePersonView, UserView, AddHospitalView, AddReceptionistView, AddDoctorView, HospitalView, AllUsersView
 from authUser.views import ChangePasswordView, UpdateSuperUserView, SuperuserDetailView, ChangeSuperuserPasswordView, DeleteUserView, AppointmentCreateView
-from authUser.views import TakenTimeslotsView, TodayAppointmentsView, DeleteAppointmentView
+from authUser.views import TakenTimeslotsView, TodayAppointmentsView, DeleteAppointmentView, DonorDetailView, UpdateDonorDetailsView, CreateDonationView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
 
@@ -28,6 +28,9 @@ urlpatterns = [
     path('api/appointments/takentimeslots/', TakenTimeslotsView.as_view(), name='taken_timeslots'),
     path('api/appointments/today/', TodayAppointmentsView.as_view(), name='today_appointments'),
     path('api/deleteappointment/<int:appointment_id>/', DeleteAppointmentView.as_view(), name='delete_appointment'),
+    path('api/donor/<int:pk>/', DonorDetailView.as_view(), name='donor_detail'),
+    path('api/donor/updateprofile/<int:pk>/', UpdateDonorDetailsView.as_view(), name='donor_update_profile'),
+    path('api/doctor/addblood/', CreateDonationView.as_view(), name='add_blood'),
    
 
 

@@ -1,3 +1,4 @@
+from .models import Donor
 from .models import Donor, Patient, Hospital, Receptionist, Doctor, Appointment, Person
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -276,6 +277,10 @@ class AddDoctorSerializer(serializers.ModelSerializer):
 # }
 
 
+
+
+
+
 # -------------------------------------------Appointment-------------------------
 
 
@@ -311,12 +316,12 @@ class AppointmentSerializer(serializers.ModelSerializer):
     start_time = TimeFieldAMPM()
     end_time = TimeFieldAMPM()
     email = serializers.EmailField(
-        write_only=True)  
+        write_only=True)
 
     class Meta:
         model = Appointment
         fields = ['id', 'date', 'start_time', 'end_time',
-                  'email']  
+                  'email']
 
     def validate_email(self, value):
         try:
@@ -352,9 +357,7 @@ class DateSerializer(serializers.Serializer):
     date = serializers.DateField()
 
 
-
-
-#fetching todays appointments
+# fetching todays appointments
 
 class TodayAppointmentSerializer(serializers.ModelSerializer):
     person_first_name = serializers.CharField(source='person.first_name')
@@ -364,21 +367,31 @@ class TodayAppointmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Appointment
-        fields = ['id', 'date', 'start_time', 'end_time', 'person_first_name', 'person_last_name' , 'person_id', 'person_email']
+        fields = ['id', 'date', 'start_time', 'end_time', 'person_first_name',
+                  'person_last_name', 'person_id', 'person_email']
 
 
+# ------------------------------Donor-------------------------------------
 
 
+class DonorDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donor
+        # exclude = ['password']
+        fields = ['id', 'first_name', 'last_name', 'email', 'diseases', 'gender',
+                  'dateOfBirth', 'bloodType', 'emergencyContact', 'address',  'contact_no', 'city']
 
+        extra_kwargs = {
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'email': {'required': False},
+            'password': {'write_only': False},
+            'contact_no': {'required': False},
+            'dateOfBirth': {'required': False},
+            'gender': {'required': False},
+            'city': {'required': False},
 
-
-
-
-
-
-
-
-
+        }
 
 
 

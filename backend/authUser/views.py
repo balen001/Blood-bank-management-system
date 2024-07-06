@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from .models import Donor, Patient, User, Hospital, Receptionist, Doctor, Appointment, Person
+from .models import Donor, Patient, User, Hospital, Receptionist, Doctor, Appointment, Person, Blood_bag, Donation_record
 from rest_framework import generics, serializers
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
 from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer, AppointmentSerializer
-from .serializers import DateSerializer, TodayAppointmentSerializer
+from .serializers import DateSerializer, TodayAppointmentSerializer, DonorDetailSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from .permissions import IsSuperUser
 from .utils import convert_to_ampm
@@ -410,3 +410,94 @@ class DeleteAppointmentView(APIView):
     
 
 
+
+
+
+#------------------------------donor-------------------------
+
+class DonorDetailView(generics.RetrieveAPIView):
+    parser_classes =[IsAuthenticated]
+    
+    queryset = Donor.objects.all()
+    serializer_class = DonorDetailSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk' 
+
+
+
+
+class UpdateDonorDetailsView(generics.UpdateAPIView):
+    queryset = Donor.objects.all()
+    serializer_class = DonorDetailSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+
+    def put(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+class CreateDonationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        donor_email = data.get('donorEmail')
+        blood_type = data.get('bloodType')
+        amount = data.get('amount')
+        hospital_id = data.get('hospital')
+
+        # Validate the data
+        if not donor_email or not blood_type or not amount or not hospital_id:
+            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get the donor
+        donor = get_object_or_404(Donor, email=donor_email)
+
+        # Check for diseases
+        forbidden_diseases = [
+            "HIV/AIDS", "Hepatitis B", "Hepatitis C", "Cancer", "Heart Disease",
+            "Chronic Kidney Disease", "Multiple Sclerosis", "Lupus", "Hemophilia",
+            "Sickle Cell Disease", "Chagas Disease"
+        ]
+
+        if any(disease in donor.diseases for disease in forbidden_diseases):
+            return Response({'error': 'Donor has a disease that disqualifies them from donating blood.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get the hospital
+        hospital = get_object_or_404(Hospital, id=hospital_id)
+
+        # Create Blood_bag
+        blood_bag = Blood_bag.objects.create(
+            bloodType=blood_type,
+            hospital=hospital
+        )
+
+        # Create Donation_record
+        donation_record = Donation_record.objects.create(
+            amount=amount,
+            donor=donor
+        )
+
+        return Response({
+            'message': 'Donation recorded successfully.',
+            'blood_bag': {
+                'id': blood_bag.id,
+                'bloodType': blood_bag.bloodType,
+                'hospital': blood_bag.hospital.name,
+                'created_at': blood_bag.created_at
+            },
+            'donation_record': {
+                'id': donation_record.id,
+                'amount': donation_record.amount,
+                'donor': donor.email,
+                'date': donation_record.date,
+                'time': donation_record.time
+            }
+        }, status=status.HTTP_201_CREATED)
