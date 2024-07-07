@@ -144,7 +144,7 @@ export default function DoctorSideNav() {
 
                     {/* Patient Requests */}
 
-                    <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/requests')}>
+                    <ListItem disablePadding sx={{ display: 'block' }} onClick={() => navigate('/patientrequests')}>
                         <ListItemButton
                             sx={{
                                 minHeight: 48,

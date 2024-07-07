@@ -19,7 +19,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import Person2Icon from '@mui/icons-material/Person2';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import HistoryIcon from '@mui/icons-material/History';
-
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 import {useNavigate} from 'react-router-dom';
 import { useAppStore } from '../appStore';
@@ -157,6 +157,31 @@ export default function PatientSideNav() {
                   <Person2Icon />
                 </ListItemIcon>
                 <ListItemText primary="My Profile" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+            </ListItem>
+
+
+
+            {/* Requests */}
+
+            <ListItem disablePadding sx={{ display: 'block' }} onClick={()=>navigate('/Requests')}>
+              <ListItemButton
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <AssignmentIcon />
+                </ListItemIcon>
+                <ListItemText primary="Requests" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
             </ListItem>
 

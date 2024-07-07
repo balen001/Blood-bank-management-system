@@ -1,34 +1,57 @@
 import React from 'react';
 import NavBar from "../../components/NavBar";
-import DonorSideNav from "../../components/DonorSideNav";
+import AdminSideNav from "../../components/AdminSideNav";
 import ConfirmDialog from '../../components/ConfirmDialog';
+import RequestDetailPopup from '../../components/RequestDetailPopup';
+import PatientSideNav from '../../components/PatientSideNav';
 import SetDonorAppointmentPopup from '../../components/SetDonorAppointmentPopup';
 
 import { Box, Typography, Card, CardContent, Grid, Divider, IconButton, Button, Icon } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
+import TextField from '@mui/material/TextField';
 
 import dayjs from 'dayjs';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { ACCESS_TOKEN } from '../../constants';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants';
+
+import axios from 'axios';
+import DoctorSideNav from '../../components/DoctorSideNav';
 
 
-function DonorAppointments() {
+function Requests() {
+
+    // const [searchQuery, setSearchQuery] = useState(''); // Added line
+    // const [filteredUsers, setFilteredUsers] = useState([]); // Added line
 
 
-    const [appointments, setAppointments] = useState([{}]);
+
+
+    // let users = [
+
+
+    //     { id: 1, email: 'hello@gma.com', userType: 'doctor', userHospital: 'Hospital 1'},
+    //     { id: 2, email: 'holoyy@gma.com', userType: 'receptionist' , userHospital: 'Hospital 2' },
+
+
+    // ];
+
+
+    const [users, setUsers] = useState([{}]);
 
     useEffect(() => {
-        const fetchAppointments = async () => {
+        const fetchUsers = async () => {
             try {
-                const response = await fetch(`http://127.0.0.1:8000/api/person/appointments/${localStorage.getItem('userId')}/`, {
+                const response = await fetch(`http://127.0.0.1:8000/api/requests/patient/${localStorage.getItem('userId')}/`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -39,27 +62,35 @@ function DonorAppointments() {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                setAppointments(data); // Added line
 
-                console.log("Fetched data:", data);
-                setAppointments(data);
+                // console.log("Fetched data:", data);
+                setUsers(data);
 
             } catch (error) {
-                console.error('Error fetching appointments:', error);
+                console.error('Error fetching users:', error);
             }
         };
 
-        fetchAppointments();
+        fetchUsers();
     }, []);
-    // let appointments = [
-    //     { id: 1, date: '1-10-2023', startTime: '12:00', endTime: '12:30' },
-    //     { id: 2, date: '1-10-2023', startTime: '12:30', endTime: '1:00' }
+
+    useEffect(() => {
+        console.log("Updated users:", users);
+    }, [users]);
 
 
-    // ];
+    // const handleSearch = () => { // Added function
+    //     if (searchQuery.trim() === '') {
+    //         setFilteredUsers(users); // Added line
+    //     } else {
+    //         const results = users.filter(user =>
+    //             `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
+    //         );
+    //         setFilteredUsers(results);
+    //     }
+    // };
 
-    const [isPopupOpen, setPopupOpen] = useState(false);
-    
+
 
 
     const [value, setValue] = React.useState(dayjs());
@@ -67,68 +98,82 @@ function DonorAppointments() {
     //deletion operation
 
 
-    const handleDelete = (appointment) => {
+    const handleDelete = (user) => {
         Swal.fire({
             title: 'Are you sure?',
-            text: 'You will not be able to recover this',
+            text: 'You will not be able undo this!',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Cancel the appointment',
+            confirmButtonText: 'Yes, reject it!',
             confirmButtonColor: 'red',
             cancelButtonText: 'No, keep it',
             width: '400px',
             heightAuto: true
         }).then((result) => {
             if (result.isConfirmed) {
-                const appointmentId = appointment.id;
-                console.log('Appointment ID to delete:', appointmentId);
-    
-                const deleteAppointment = async () => {
+                const userId = user.id;
+                console.log('User ID to delete:', userId);
+                const deleteData = {
+                    user_id: userId,
+                };
+                console.log('Delete data:', deleteData);
+
+                const deleteUser = async () => {
                     try {
-                        
-                        const response = await fetch(`http://127.0.0.1:8000/api/deleteappointment/${appointmentId}/`, {
-                            method: 'DELETE',
+                        const response = await fetch('http://127.0.0.1:8000/api/admin/deleteuser/', {
+                            method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
-                            }
+                            },
+                            body: JSON.stringify(deleteData),
                         });
-    
+
                         if (response.ok) {
+                            try {
+                                const data = await response.json();
+                                console.log("User deleted successfully:", data);
+                            } catch (e) {
+                                console.log("No JSON response, user deleted successfully.");
+                            }
+
                             Swal.fire({
                                 title: 'Deleted!',
-                                text: 'Appointment has been deleted.',
+                                text: 'User has been deleted.',
                                 icon: 'success'
                             }).then(() => {
                                 // Optionally, you can reload or update your UI after deletion
                                 window.location.reload(); // Example: Reload the page
                             });
                         } else {
-                            console.error('Failed to delete appointment');
-                            Swal.fire('Error!', 'Failed to delete appointment.', 'error');
+                            console.error('Failed to delete user');
+                            Swal.fire('Error!', 'Failed to delete user.', 'error');
                         }
                     } catch (error) {
                         console.error('Error:', error);
                         Swal.fire('Error!', 'An error occurred.', 'error');
                     }
                 };
-    
-                deleteAppointment(); // Call the async function
-    
+
+                deleteUser(); // Call the async function
+
             } else if (result.dismiss === Swal.DismissReason.cancel) {
                 // handle cancel
-    
-                console.log("Appointment delete canceled");
+
+                console.log("User delete canceled");
             }
         });
-    }
+    };
 
 
-    const [selectedAppointment, setSelectedAppointment] = useState(null);
+    //-----------------------------------------------------------------------------------
+
+    const [isPopupOpen, setPopupOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
 
 
-    const handleOpenPopup = () => {
-        setSelectedAppointment();
+    const handleOpenPopup = (user) => {
+        setSelectedUser(user);
         setPopupOpen(true);
     };
 
@@ -137,42 +182,20 @@ function DonorAppointments() {
     };
 
 
-
-    // const [openDialog, setOpenDialog] = useState(false);
-
-    // const handleDelete = () => {
-    //     setOpenDialog(true);
-    // };
-
-    // const handleClose = () => {
-    //     setOpenDialog(false);
-    // };
-
-    // const handleConfirm = () => {
-    //     // Perform the deletion action here
-    //     console.log("Item deleted");
-    //     setOpenDialog(false);
-    // };
-
-    //-----------------------------------------------------------------------------------
-
-
-
-
     return (
 
         <>
             <NavBar />
             <Box height={30} />
             <Box sx={{ display: 'flex' }}>
-                {localStorage.getItem('user_type') === 'donor' ? <DonorSideNav /> : null}
+                {localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : null}
                 <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
 
 
                     <Box height={60}></Box>
 
                     <Typography variant="h4" component="h4" align="left" gutterBottom ml={1}>
-                        Appointments
+                        Requests
                     </Typography>
                     <Box mt={5}></Box>
 
@@ -193,10 +216,10 @@ function DonorAppointments() {
                                     backgroundColor: '#038253',
                                 }
                             }}
-                            onClick={() => handleOpenPopup()}
+                                onClick={() => handleOpenPopup()}
                             >
 
-                                Set an appointment
+                                Send a request
                             </Button>
 
 
@@ -206,51 +229,29 @@ function DonorAppointments() {
 
                         <Box display="flex" flexDirection="row" alignItems="center">
 
-                            <Box>
+                            {/* <Box>
                                 <Box mt={1.5}></Box>
                                 <Typography variant="h7" component="div" fontWeight="bold" gutterBottom ml={1}>
-                                    Search by date
+                                    Search by name
                                 </Typography>
                             </Box>
 
                             <Box mr={2}></Box>
                             <Box display="flex" alignItems="center">
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                    <DemoContainer components={['DatePicker', 'DatePicker']}>
-                                        <DatePicker
 
-                                            label="from"
-                                            value={value}
-                                            onChange={(newValue) => setValue(newValue)}
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </Box>
 
-                            <Box mr={1}>
-                                <Box mt={1}></Box>
-                                <Typography variant="h7" component="div" fontWeight="bold" gutterBottom ml={1}>
-                                    to
-                                </Typography>
-                            </Box>
+                                <TextField
+                                    label="Search"
+                                    variant="outlined"
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </Box> */}
 
-                            <Box display="flex" alignItems="center">
-                                <LocalizationProvider dateAdapter={AdapterDayjs} >
-                                    <DemoContainer components={['DatePicker', 'DatePicker']}>
-                                        <DatePicker
-
-                                            label="to"
-                                            value={value}
-                                            onChange={(newValue) => setValue(newValue)}
-                                        />
-                                    </DemoContainer>
-                                </LocalizationProvider>
-                            </Box>
 
 
                             <Box mr={3}></Box>
                             {/* Search button */}
-                            <Box display="flex" alignItems="right" >
+                            {/* <Box display="flex" alignItems="right" >
 
 
                                 <Button startIcon={<SearchIcon />} sx={{
@@ -260,15 +261,13 @@ function DonorAppointments() {
                                     marginTop: '10px',
                                 }}
 
-                                onClick={() => {
-                                    // Search logic here
-                                  }}
-                                
+                                    // onClick={handleSearch}
+
                                 >
                                     Search
                                 </Button>
 
-                            </Box>
+                            </Box> */}
 
 
                         </Box>
@@ -277,11 +276,11 @@ function DonorAppointments() {
                     <Box mt={5}></Box>
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', flexWrap: 'wrap' }}>
-                        {appointments.map((appointment) => (
-                            <Card variant="outlined" style={{ margin: '5px', width: '100%' }} key={appointment.id}>
+                        {users.map((user) => (
+                            <Card variant="outlined" style={{ margin: '5px', width: '100%' }} key={user.id}>
                                 <CardContent>
                                     <Grid container spacing={2} alignItems="center">
-                                        <Grid item xs={2.75} alignItems="center">
+                                        {/* <Grid item xs={2.75} alignItems="center">
                                             <Box display="flex" flexDirection="column" alignItems="center">
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
@@ -290,10 +289,10 @@ function DonorAppointments() {
                                                 <Divider sx={{ width: '100%' }} />
                                                 <Box mt={1}></Box>
                                                 <Typography variant="body1" component="div">
-                                                    {appointment.id}
+                                                    {user.id}
                                                 </Typography>
                                             </Box>
-                                        </Grid>
+                                        </Grid> */}
 
                                         <Grid item xs={2.75} alignItems="center">
                                             <Box display="flex" flexDirection="column" alignItems="center">
@@ -305,41 +304,60 @@ function DonorAppointments() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {appointment.date}
+                                                    {user.date}
                                                 </Typography>
                                             </Box>
                                         </Grid>
+
+                                        <Grid item xs={2.75} alignItems="center">
+                                            <Box display="flex" flexDirection="column" alignItems="center">
+                                                <Box mt={2}></Box>
+                                                <Typography variant="h7" component="div" fontWeight="bold">
+                                                    Needed amount
+                                                </Typography>
+                                                <Divider sx={{ width: '100%' }} />
+                                                <Box mt={1}></Box>
+
+                                                <Typography variant="body1" component="div">
+                                                    {user.neededAmount} Blood bag(s)
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+
+
+
+                                        <Grid item xs={2.75} alignItems="center">
+                                            <Box display="flex" flexDirection="column" alignItems="center">
+                                                <Box mt={2}></Box>
+                                                <Typography variant="h7" component="div" fontWeight="bold">
+                                                    Request reason
+                                                </Typography>
+                                                <Divider sx={{ width: '100%' }} />
+                                                <Box mt={1}></Box>
+
+                                                <Typography variant="body1" component="div">
+                                                    {user.requestReason}
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+
 
                                         <Grid item xs={2.75}>
                                             <Box display="flex" flexDirection="column" alignItems="center" >
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
-                                                    Start time
+                                                    Status
                                                 </Typography>
                                                 <Divider sx={{ width: '100%' }} />
                                                 <Box mt={1}></Box>
 
 
                                                 <Typography variant="body1" component="div">
-                                                    {appointment.start_time}
+                                                    {user.status}
                                                 </Typography>
                                             </Box>
                                         </Grid>
 
-                                        <Grid item xs={2.75}>
-                                            <Box display="flex" flexDirection="column" alignItems="center">
-                                                <Box mt={2}></Box>
-                                                <Typography variant="h7" component="div" fontWeight="bold">
-                                                    End time
-                                                </Typography>
-                                                <Divider sx={{ width: '100%' }} />
-                                                <Box mt={1}></Box>
-
-                                                <Typography variant="body1" component="div">
-                                                    {appointment.end_time}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
 
                                         <Grid item xs={1}>
 
@@ -350,16 +368,19 @@ function DonorAppointments() {
                                                 <Divider sx={{ width: '100%' }} /> */}
                                                 {/* <Box mt={1}></Box> */}
 
-                                                <IconButton aria-label="delete" onClick={() => handleDelete(appointment)} title='Delete appointment'>
-                                                    <DeleteIcon />
+                                                {/* <IconButton aria-label="delete" onClick={() => handleDelete(user)} title='Delete user'>
+                                                    <CancelIcon />
 
-                                                </IconButton>
+                                                </IconButton> */}
 
-                                                {/* <ConfirmDialog
-                                                    open={openDialog}
-                                                    onClose={handleClose}
-                                                    onConfirm={handleConfirm}
-                                                /> */}
+
+                                                {/* <IconButton aria-label="edit" onClick={() => handleOpenPopup(user)} title='change password'>
+
+                                                    <VisibilityIcon />
+
+                                                </IconButton> */}
+
+
 
                                             </Box>
 
@@ -374,13 +395,18 @@ function DonorAppointments() {
                 </Box>
             </Box>
 
+
+
             {isPopupOpen && (
                 <SetDonorAppointmentPopup open={isPopupOpen} onClose={handleClosePopup} personEmail={localStorage.getItem('userEmail')} />
             )}
+
         </>
+
+
     )
 
 
 }
 
-export default DonorAppointments;
+export default Requests;

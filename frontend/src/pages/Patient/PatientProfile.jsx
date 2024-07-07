@@ -1,20 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import DonorSideNav from '../../components/DonorSideNav';
 import PatientSideNav from '../../components/PatientSideNav';
-import Box from '@mui/material/Box';
-import NavBar from '../../components/NavBar';
-import { Container, Typography, Grid, TextField, Button, MenuItem } from '@mui/material';
-import { styled } from '@mui/system';
-import { useState } from 'react';
-import EditIcon from '@mui/icons-material/Edit';
 import AdminSideNav from '../../components/AdminSideNav';
-
-
-
-
-
-
-
+import NavBar from '../../components/NavBar';
+import Box from '@mui/material/Box';
+import { Container, Typography, Grid, TextField, Button, MenuItem, Snackbar } from '@mui/material';
+import { styled } from '@mui/system';
+import EditIcon from '@mui/icons-material/Edit';
+import Alert from '@mui/material/Alert';
+import { ACCESS_TOKEN } from '../../constants';
 
 const FormContainer = styled(Container)(({ theme }) => ({
   paddingTop: theme.spacing(4),
@@ -38,9 +32,15 @@ const bloodOptions = [
   { value: 'AB-', label: 'AB-' },
 ];
 
+
+
+
+
 const diseaseOptions = [
   { value: 'None', label: 'None' },
   { value: 'HIV/AIDS', label: 'HIV/AIDS' },
+  { value: 'Diabetes', label: 'Diabetes' },
+  { value: 'Hypothyroidism', label: 'Hypothyroidism' },
   { value: 'Hepatitis B', label: 'Hepatitis B' },
   { value: 'Hepatitis C', label: 'Hepatitis C' },
   { value: 'Cancer', label: 'Cancer' },
@@ -55,27 +55,140 @@ const diseaseOptions = [
 ];
 
 
+const allergyOptions =[
+  { value: 'Severe Allergic reaction (anaphylaxis)', label: 'Severe Allergic reaction (anaphylaxis)' },
+  { value: 'Allergic to human blood products', label: 'Allergic to human blood products' },
+  { value: 'Allergic to albumin', label: 'Allergic to albumin' },
+  { value: 'Allergic to anticoagulants', label: 'Allergic to anticoagulants' },
+  { value: 'Allergic to foods (e.g., peanuts, dairy)', label: 'Allergic to foods (e.g., peanuts, dairy)' },
+  { value: 'Allergic to pet dander', label: 'Allergic to pet dander' },
+  { value: 'Allergic to pollen', label: 'Allergic to pollen' },
+  { value: 'Allergic to latex', label: 'Allergic to latex' }
+]
+
+
+let message = ''
+
+
 function PatientProfile() {
 
 
 
+
+
+
+  const [loading, setLoading] = useState(true); // State to manage loading state
+  const [userData, setUserData] = useState({
+    address: '',
+    city: '',
+    bloodType: '',
+    diseases: [''],
+    allergy: '',
+    emergencyContact: '',
+  });
+
   const [isEmergencyEditable, setIsEmergencyEditable] = useState(false);
   const [isAddressEditable, setIsAddressEditable] = useState(false);
   const [isCityEditable, setIsCityEditable] = useState(false);
-  const [isZipEditable, setIsZipEditable] = useState(false);
   const [isBloodEditable, setIsBloodEditable] = useState(false);
   const [isDiseaseEditable, setIsDiseaseEditable] = useState(false);
+  const [isDisease2Editable, setIsDisease2Editable] = useState(false);
+  const [isAllergyEditable, setIsAllergyEditable] = useState(false);
 
+
+
+  const [open, setOpen] = useState(false);
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    const fetchPatientData = async (patientId) => {
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/patient/${patientId}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUserData({
+            address: data.address || '',
+            city: data.city || '',
+            email: data.email || '',
+            contact_no: data.contact_no || '',
+            bloodType: data.bloodType || '',
+            emergencyContact: data.emergencyContact || '',
+            diseases: [...data.diseases] || [''],
+            allergy: data.allergy || '',
+          });
+          setLoading(false); // Set loading to false after successful fetch
+        } else {
+          console.error('Failed to fetch patient data');
+        }
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+      }
+    };
+
+    fetchPatientData(localStorage.getItem('userId'));
+  }, []);
+
+  const handleDiseaseChange = (event, index) => {
+    const newDiseases = [...userData.diseases];
+    newDiseases[index] = event.target.value;
+    setUserData({ ...userData, diseases: newDiseases });
+  };
+
+
+  //update profile
+  const handleUpdate = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000//api/patient/updateprofile/${localStorage.getItem('userId')}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+        },
+        body: JSON.stringify(userData),
+        console: console.log("userData", JSON.stringify(userData))
+      });
+      if (response.ok) {
+        console.log('Update successful');
+        message = "Profile updated successfully"
+        setOpen(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 4000);
+      } else {
+        console.error('Failed to update profile');
+        message = "Failed to update profile"
+        setOpen(true);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      message = "Error updating profile"
+      setOpen(true);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>; // Render loading state until data is fetched
+  }
 
   return (
-
-
     <>
       <NavBar />
       <Box height={30} />
       <Box sx={{ display: 'flex' }}>
         {localStorage.getItem('user_type') === 'donor' ? <DonorSideNav /> :
-          localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : null}
+          localStorage.getItem('user_type') === 'patient' ? <PatientSideNav /> : localStorage.getItem('user_type') === 'admin' ? <AdminSideNav /> : null}
         <Box component="main" sx={{ display: 'flex', justifyContent: 'flex-start', p: 1 }}>
           <FormContainer maxWidth="md">
             {/* --- */}
@@ -84,85 +197,59 @@ function PatientProfile() {
             </Typography>
             <Box mt={3}></Box>
             <Grid container spacing={3}>
-
               <Grid item xs={12} sm={8}>
-                <Box display="flex" alignItems="center">  {/*defaultValue={"shaqlawa"}  the default value should be the current info of the user*/}
+                <Box display="flex" alignItems="center">
                   <TextField fullWidth
                     label="Address"
                     variant="outlined"
                     placeholder="Enter your home address"
+                    value={userData.address}
                     InputProps={{
                       disabled: !isAddressEditable,
-                    }} />
-                  <Button
-                    startIcon={<EditIcon />}
-                    // sx={{ ml: 1 }}
-                    size="small"
-                    onClick={() => setIsAddressEditable(isAddressEditable => !isAddressEditable)}
-                    sx={{ width: '10px' }}
-                  >
-                  </Button>
-
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={4}>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <Box display="flex" alignItems="center">
-                  <TextField fullWidth label="City" variant="outlined" placeholder="City"
-                    InputProps={{
-                      disabled: !isCityEditable,
                     }}
+                    onChange={(e) => setUserData({ ...userData, address: e.target.value })}
                   />
                   <Button
                     startIcon={<EditIcon />}
-                    // sx={{ ml: 1 }}
                     size="small"
-                    onClick={() => setIsCityEditable(isCityEditable => !isCityEditable)}
-                    sx={{ width: '10px' }}
-                  >
-                  </Button>
+                    onClick={() => setIsAddressEditable(prev => !prev)}
+                  />
                 </Box>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={5}>
                 <Box display="flex" alignItems="center">
-                  <TextField fullWidth label="ZIP" variant="outlined" placeholder="ZIP"
+                  <TextField fullWidth label="City" variant="outlined" placeholder="City"
+                    value={userData.city}
                     InputProps={{
-                      disabled: !isZipEditable,
-                    }} />
+                      disabled: !isCityEditable,
+                    }}
+                    onChange={(e) => setUserData({ ...userData, city: e.target.value })}
+                  />
                   <Button
                     startIcon={<EditIcon />}
-                    // sx={{ ml: 1 }}
                     size="small"
-                    onClick={() => setIsZipEditable(isZipEditable => !isZipEditable)}
-                    sx={{ width: '10px' }}
-                  >
-                  </Button>
+                    onClick={() => setIsCityEditable(prev => !prev)}
+                  />
                 </Box>
               </Grid>
             </Grid>
 
             {/* medical information */}
-
-
-
-
-
             <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
               Medical information
             </Typography>
             <Box mt={3}></Box>
-
             <Grid container spacing={3}>
               <Grid item xs={12} sm={8}>
                 <Box display="flex" alignItems="center">
                   <TextField fullWidth label="Blood type"
                     variant="outlined"
-                    defaultValue={"A+"}
+                    value={userData.bloodType}
+                    onChange={(e) => setUserData({ ...userData, bloodType: e.target.value })}
                     InputProps={{
                       disabled: !isBloodEditable,
-                    }} select>
+                    }}
+                    select>
                     {bloodOptions.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
@@ -171,26 +258,21 @@ function PatientProfile() {
                   </TextField>
                   <Button
                     startIcon={<EditIcon />}
-                    // sx={{ ml: 1 }}
                     size="small"
-                    onClick={() => setIsBloodEditable(isBloodEditable => !isBloodEditable)}
-                    sx={{ width: '10px' }}
-                  >
-                  </Button>
+                    onClick={() => setIsBloodEditable(prev => !prev)}
+                  />
                 </Box>
-
               </Grid>
-              <Grid item xs={12} sm={4}>
-              </Grid>
-
               <Grid item xs={12} sm={6}>
                 <Box display="flex" alignItems="center">
-                  <TextField fullWidth label="Disease"
+                  <TextField fullWidth label="Disease-1"
                     variant="outlined"
-                    defaultValue={"None"}
+                    value={userData.diseases[0]}
+                    onChange={(e) => handleDiseaseChange(e, 0)}
                     InputProps={{
                       disabled: !isDiseaseEditable,
-                    }} select>
+                    }}
+                    select>
                     {diseaseOptions.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
@@ -199,63 +281,103 @@ function PatientProfile() {
                   </TextField>
                   <Button
                     startIcon={<EditIcon />}
-                    // sx={{ ml: 1 }}
                     size="small"
-                    onClick={() => setIsDiseaseEditable(isDiseaseEditable => !isDiseaseEditable)}
-                    sx={{ width: '10px' }}
-                  >
-                  </Button>
+                    onClick={() => setIsDiseaseEditable(prev => !prev)}
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Box display="flex" alignItems="center">
+                  <TextField fullWidth label="Disease-2"
+                    variant="outlined"
+                    value={userData.diseases[1]}
+                    onChange={(e) => handleDiseaseChange(e, 1)}
+                    InputProps={{
+                      disabled: !isDisease2Editable,
+                    }}
+                    select>
+                    {diseaseOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <Button
+                    startIcon={<EditIcon />}
+                    size="small"
+                    onClick={() => setIsDisease2Editable(prev => !prev)}
+                  />
                 </Box>
               </Grid>
 
               <Grid item xs={12} sm={6}>
                 <Box display="flex" alignItems="center">
-                  <TextField
-                    fullWidth
+                  <TextField fullWidth label="Allergies"
+                    variant="outlined"
+                    value={userData.allergy}
+                    onChange={(e) => setUserData({ ...userData, allergy: e.target.value })}
+                    InputProps={{
+                      disabled: !isAllergyEditable,
+                    }}
+                    select>
+                    {allergyOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <Button
+                    startIcon={<EditIcon />}
+                    size="small"
+                    onClick={() => setIsAllergyEditable(prev => !prev)}
+                  />
+                </Box>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Box display="flex" alignItems="center">
+                  <TextField fullWidth
                     label="Emergency contact"
                     variant="outlined"
                     placeholder="+(964) 7501234567"
+                    value={userData.emergencyContact}
                     type="tel"
+                    onChange={(e) => setUserData({ ...userData, emergencyContact: e.target.value })}
                     InputProps={{
                       disabled: !isEmergencyEditable,
                     }}
                   />
                   <Button
                     startIcon={<EditIcon />}
-                    // sx={{ ml: 1 }}
                     size="small"
-                    onClick={() => setIsEmergencyEditable(isEmergencyEditable => !isEmergencyEditable)}
-                    sx={{ width: '10px' }}
-                  >
-                  </Button>
+                    onClick={() => setIsEmergencyEditable(prev => !prev)}
+                  />
                 </Box>
               </Grid>
-
             </Grid>
 
-
-
-
-
-
-            <Button variant="contained" color="primary" sx={{ mt: 4 }}>
-              {/* you should check if mandatory fields are empty or not before allowing to save. */}
+            <Button variant="contained" color="primary" sx={{ mt: 4 }} onClick={handleUpdate}>
               Save All
             </Button>
           </FormContainer>
         </Box>
-
       </Box>
 
+      <Snackbar
+        open={open}
+        autoHideDuration={5000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleClose} severity={open && message.includes('successfully') ? 'success' : 'error'} sx={{ width: '100%' }}>
+          {message}
+        </Alert>
+      </Snackbar>
     </>
-
-
-
   );
 }
 
 export default PatientProfile;
-
-
-
-

@@ -1,5 +1,5 @@
 from .models import Donor
-from .models import Donor, Patient, Hospital, Receptionist, Doctor, Appointment, Person
+from .models import Donor, Patient, Hospital, Receptionist, Doctor, Appointment, Person, Request
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.hashers import make_password
@@ -77,7 +77,7 @@ class PatientRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = ['id', 'first_name', 'last_name', 'email', 'password', 'contact_no',
-                  'dateOfBirth', 'gender', 'bloodType', 'emergencyContact', 'diseases', 'allergies']
+                  'dateOfBirth', 'gender', 'bloodType', 'emergencyContact', 'diseases', 'allergy']
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},  # it should at least receive ''
@@ -312,7 +312,7 @@ class TimeFieldAMPM(serializers.Field):
                 "Time must be in the format HH:MM AM/PM")
 
 
-class AppointmentSerializer(serializers.ModelSerializer):
+class CreateAppointmentSerializer(serializers.ModelSerializer):
     start_time = TimeFieldAMPM()
     end_time = TimeFieldAMPM()
     email = serializers.EmailField(
@@ -372,7 +372,7 @@ class TodayAppointmentSerializer(serializers.ModelSerializer):
         
 
 
-class DonorAppointmentsSerializer(serializers.ModelSerializer):
+class AppointmentsSerializer(serializers.ModelSerializer):
     start_time = TimeFieldAMPM()
     end_time = TimeFieldAMPM()
     class Meta:
@@ -420,6 +420,48 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'city': {'required': False},
         
         }
+
+
+
+#---------------------------------patient----------------------------
+
+
+class PatientDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        # exclude = ['password']
+        fields = ['id', 'first_name', 'last_name', 'email', 'diseases', 'gender',
+                  'dateOfBirth', 'bloodType', 'allergy' , 'emergencyContact', 'address',  'contact_no', 'city']
+
+        extra_kwargs = {
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'email': {'required': False},
+            'password': {'write_only': False},
+            'contact_no': {'required': False},
+            'dateOfBirth': {'required': False},
+            'gender': {'required': False},
+            'city': {'required': False},
+            'emergencyContact': {'required': False},
+            'allergy': {'required': False},
+            
+        }
+
+
+#request serializer
+class RequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Request
+        fields = ['date','neededAmount', 'requestReason', 'patient', 'status']
+
+        extra_kwargs = {
+            'status': {'required': False},
+            'date': {'required': False},
+
+        }
+
+
+
 
 
 

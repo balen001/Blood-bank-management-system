@@ -1,9 +1,10 @@
 from django.shortcuts import render
-from .models import Donor, Patient, User, Hospital, Receptionist, Doctor, Appointment, Person, Blood_bag, Donation_record
+from .models import Donor, Patient, User, Hospital, Receptionist, Doctor, Appointment, Person, Blood_bag, Donation_record, Request
 from rest_framework import generics, serializers
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
-from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer, AppointmentSerializer
-from .serializers import DateSerializer, TodayAppointmentSerializer, PersonDetailSerializer, DonorAppointmentsSerializer
+from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer, CreateAppointmentSerializer
+from .serializers import DateSerializer, TodayAppointmentSerializer, PersonDetailSerializer, AppointmentsSerializer, PatientDetailSerializer, RequestSerializer
+
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from .permissions import IsSuperUser
 from .utils import convert_to_ampm
@@ -343,22 +344,21 @@ class AddDoctorView(APIView):
 
 # ----------------------Appointment----------------------------------
 
-#Everyone can set appointment change this later
+# Everyone can set appointment change this later
 class AppointmentCreateView(generics.CreateAPIView):
 
     permission_classes = [IsAuthenticated]
-    serializer_class = AppointmentSerializer
+    serializer_class = CreateAppointmentSerializer
     queryset = Appointment.objects.all()
 
     def perform_create(self, serializer):
-        
+
         person = serializer.validated_data.pop('email', None)
         if person:
             serializer.save(person=person)
         else:
             raise serializers.ValidationError("Email is required.")
 
-   
 
 class TakenTimeslotsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -376,13 +376,11 @@ class TakenTimeslotsView(APIView):
                 taken_timeslots.append(f"{start_time} - {end_time}")
 
             return Response(taken_timeslots, status=status.HTTP_200_OK)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    
-
-#to fetch todays appointments
+# to fetch todays appointments
 
 class TodayAppointmentsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -394,7 +392,7 @@ class TodayAppointmentsView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-#delete appointment
+# delete appointment
 
 class DeleteAppointmentView(APIView):
     permission_classes = [IsAuthenticated]
@@ -407,31 +405,31 @@ class DeleteAppointmentView(APIView):
         appointment.delete()
 
         return Response({'message': 'Appointment deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
-    
 
 
-class DonorAppointmentsListView(generics.ListAPIView):
-    serializer_class = DonorAppointmentsSerializer
+#List appointments
+class PersonAppointmentsListView(generics.ListAPIView):
+    serializer_class = AppointmentsSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        donor_id = self.kwargs['donor_id']  # assuming donor_id is passed as a URL parameter
-        return Appointment.objects.filter(person__id=donor_id).order_by('-date', '-start_time')
+        # assuming donor_id is passed as a URL parameter
+        person_id = self.kwargs['person_id']
+        return Appointment.objects.filter(person__id=person_id).order_by('-date', '-start_time')
 
 
-#------------------------------donor-------------------------
+# ------------------------------donor-------------------------
 
 class DonorDetailView(generics.RetrieveAPIView):
-    parser_classes =[IsAuthenticated]
-    
+    parser_classes = [IsAuthenticated]
+
     queryset = Donor.objects.all()
     serializer_class = PersonDetailSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'pk' 
+    lookup_field = 'pk'
 
 
-
-#updates donor & patient but not receptionist and doctor
+# updates donor & patient but not receptionist and doctor
 class UpdateDonorDetailsView(generics.UpdateAPIView):
     queryset = Donor.objects.all()
     serializer_class = PersonDetailSerializer
@@ -441,22 +439,20 @@ class UpdateDonorDetailsView(generics.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
 class UserDetailView(generics.RetrieveAPIView):
-    parser_classes =[IsAuthenticated]
-    
+    parser_classes = [IsAuthenticated]
+
     queryset = User.objects.all()
     serializer_class = PersonDetailSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'pk' 
-
+    lookup_field = 'pk'
 
 
 class UpdateUserAccountView(generics.UpdateAPIView):
@@ -468,7 +464,8 @@ class UpdateUserAccountView(generics.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -505,10 +502,26 @@ class CreateDonationView(APIView):
         hospital = get_object_or_404(Hospital, id=hospital_id)
 
         # Create Blood_bag
-        blood_bag = Blood_bag.objects.create(
-            bloodType=blood_type,
-            hospital=hospital
-        )
+        created_blood_bags = []
+        for _ in range(amount):
+            blood_bag = Blood_bag.objects.create(
+                bloodType=blood_type,
+                hospital=hospital
+            )
+            created_blood_bags.append(blood_bag)
+
+        
+        
+        blood_bags_data = []
+
+        for blood_bag in created_blood_bags:
+            blood_bags_data.append({
+                'id': blood_bag.id,
+                'bloodType': blood_bag.bloodType,
+                'hospital': blood_bag.hospital.name,
+                'created_at': blood_bag.created_at
+                }
+            )
 
         # Create Donation_record
         donation_record = Donation_record.objects.create(
@@ -518,12 +531,7 @@ class CreateDonationView(APIView):
 
         return Response({
             'message': 'Donation recorded successfully.',
-            'blood_bag': {
-                'id': blood_bag.id,
-                'bloodType': blood_bag.bloodType,
-                'hospital': blood_bag.hospital.name,
-                'created_at': blood_bag.created_at
-            },
+            'blood_bags': blood_bags_data,
             'donation_record': {
                 'id': donation_record.id,
                 'amount': donation_record.amount,
@@ -532,10 +540,9 @@ class CreateDonationView(APIView):
                 'time': donation_record.time
             }
         }, status=status.HTTP_201_CREATED)
-    
 
 
-#change donor/patient password
+# change donor/patient/Doctor/Receptionist password
 
 
 class ChangeDonorPatientDoctorReceptionistPasswordView(APIView):
@@ -574,4 +581,58 @@ class ChangeDonorPatientDoctorReceptionistPasswordView(APIView):
         user.save()
 
         return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
+
+
+# ---------------------patient-------------------------------
+
+
+class PatientDetailView(generics.RetrieveAPIView):
+    parser_classes = [IsAuthenticated]
+
+    queryset = Patient.objects.all()
+    serializer_class = PatientDetailSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+
+
+class UpdatePatientDetailsView(generics.UpdateAPIView):
+    queryset = Patient.objects.all()
+    serializer_class = PatientDetailSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+
+    def put(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+#-------------------Request-------------------------------------
+class CreateRequestView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = RequestSerializer(data=request.data)
+        if serializer.is_valid():
+            validated_data = serializer.validated_data
+            patient_id = validated_data.pop('patient')
+            validated_data['patient'] = patient_id
+            request_instance = Request.objects.create(**validated_data)
+            response_serializer = RequestSerializer(request_instance)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+class ListPatientRequestsView(generics.ListAPIView):
+    serializer_class = RequestSerializer
+
+    def get_queryset(self):
+        patient_id = self.kwargs['patient_id']
+        return Request.objects.filter(patient_id=patient_id)
+    
+
+

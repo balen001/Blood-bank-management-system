@@ -10,6 +10,7 @@ import Profile from './pages/Profile'
 import About from './pages/About'
 import DonationHistory from './pages/Donor/DonationHistory'
 import TransfusionHistory from './pages/Patient/TransfusionHistory'
+import Requests from './pages/Patient/Requests'
 import Appointments from './pages/Appointments'
 import Account from './pages/Account'
 import Notifications from './pages/Notifications'
@@ -23,6 +24,7 @@ import PatientRequests from './pages/Doctor/PatientRequests'
 import AddBlood from './pages/Doctor/AddBlood'
 import RegisterDonor from './pages/Receptionist/RegisterDonor'
 import RegisterPatient from './pages/Receptionist/RegisterPatient'
+
 
 
 function Logout() {
@@ -59,7 +61,8 @@ function App() {
         <Route path="/addHospital" element={<ProtectedRoute><AddHospital/></ProtectedRoute>} />
         <Route path="/registerdonor" element={<ProtectedRoute><RegisterDonor/></ProtectedRoute>} />
         <Route path="/registerpatient" element={<ProtectedRoute><RegisterPatient/></ProtectedRoute>} />
-        <Route path="/requests" element={<ProtectedRoute><PatientRequests/></ProtectedRoute>} />
+        <Route path="/patientrequests" element={<ProtectedRoute><PatientRequests/></ProtectedRoute>} />
+        <Route path="/requests" element={<ProtectedRoute><Requests/></ProtectedRoute>} />
         <Route path="/participants" element={<ProtectedRoute><ParticipantsPage/></ProtectedRoute>} />
         <Route path="/addblood" element={<ProtectedRoute><AddBlood/></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
