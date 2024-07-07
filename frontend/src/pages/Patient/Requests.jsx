@@ -4,7 +4,7 @@ import AdminSideNav from "../../components/AdminSideNav";
 import ConfirmDialog from '../../components/ConfirmDialog';
 import RequestDetailPopup from '../../components/RequestDetailPopup';
 import PatientSideNav from '../../components/PatientSideNav';
-import SetDonorAppointmentPopup from '../../components/SetDonorAppointmentPopup';
+import SendRequestPopup from '../../components/SendRequestPopup';
 
 import { Box, Typography, Card, CardContent, Grid, Divider, IconButton, Button, Icon } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
@@ -398,7 +398,7 @@ function Requests() {
 
 
             {isPopupOpen && (
-                <SetDonorAppointmentPopup open={isPopupOpen} onClose={handleClosePopup} personEmail={localStorage.getItem('userEmail')} />
+                <SendRequestPopup open={isPopupOpen} onClose={handleClosePopup} userId={localStorage.getItem('userId')} />
             )}
 
         </>
