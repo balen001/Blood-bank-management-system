@@ -50,7 +50,7 @@ function PatientRequests() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/admin/users/', {
+                const response = await fetch('http://127.0.0.1:8000/api/requests/all/', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -291,7 +291,7 @@ function PatientRequests() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.email}
+                                                    {user.date}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -306,7 +306,7 @@ function PatientRequests() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.first_name} {user.last_name}
+                                                    {user.patientFirstName} {user.patientLastName}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -323,7 +323,7 @@ function PatientRequests() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.email}
+                                                    {user.patientEmail}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -340,7 +340,7 @@ function PatientRequests() {
 
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.userHospital}
+                                                    {user.status}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -385,7 +385,7 @@ function PatientRequests() {
 
 
             {isPopupOpen && selectedUser && (
-                <RequestDetailPopup open={isPopupOpen} user={selectedUser} onClose={handleClosePopup} />
+                <RequestDetailPopup open={isPopupOpen} request={selectedUser} onClose={handleClosePopup} />
             )}
 
         </>

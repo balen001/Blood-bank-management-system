@@ -22,7 +22,7 @@ const SendRequestPopup = ({ open, onClose, userId }) => {
         e.preventDefault();
 
         const requestData = {
-            neededAmount: neededAmount,
+            neededAmount: 1,
             patient: userId,
             requestReason: requestReason,
         };
@@ -72,7 +72,7 @@ const SendRequestPopup = ({ open, onClose, userId }) => {
                 <form onSubmit={handleSubmit}>
 
 
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                    {/* <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="body1" color="initial">Request Amount:</Typography>
                         <Select
                             value={neededAmount}
@@ -85,7 +85,7 @@ const SendRequestPopup = ({ open, onClose, userId }) => {
                             <MenuItem value={2}>2</MenuItem>
                             <MenuItem value={3}>3</MenuItem>
                         </Select>
-                    </Box>
+                    </Box> */}
 
                     <Box height="15px"></Box>
 

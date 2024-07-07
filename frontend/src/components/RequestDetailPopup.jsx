@@ -5,7 +5,7 @@ import { ACCESS_TOKEN } from "../constants";
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 
-const RequestDetailPopup = ({ open, onClose, user }) => {
+const RequestDetailPopup = ({ open, onClose, request }) => {
     const [openMessage, setOpenMessage] = useState(false);
     const [message, setMessage] = useState("");
     const [password, setPassword] = useState('');
@@ -20,56 +20,47 @@ const RequestDetailPopup = ({ open, onClose, user }) => {
         setOpenMessage(false);
     };
 
-    const handleSubmit = async (e) => {
+    const handleResult = async (e, result) => {
         e.preventDefault();
 
-        if (password === confPassword) {
-            const hospitalData = {
-                admin_email: adminEmail,
-                admin_password: adminPass,
-                id: user.id,
-                password: password,
-            };
 
-            try {
-                const response = await fetch('http://127.0.0.1:8000/api/admin/changeuserpassword/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
-                    },
-                    body: JSON.stringify(hospitalData),
-                });
+        const resultData = {
+            result: result,
+            requestId: request,
+            id: request,
+            password: password,
+        };
 
-                if (response.ok) {
-                    setOpenMessage(true);
-                    setMessage("Password changed successfully");
-                    setPassword('');
-                    setConfPassword('');
-                } else {
-                    console.error('Failed to change password');
-                    setMessage("Failed to change password");
-                    setOpenMessage(true);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                setMessage(error.toString());
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/admin/changeuserpassword/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+                },
+                body: JSON.stringify(resultData),
+            });
+
+            if (response.ok) {
+                setOpenMessage(true);
+                setMessage("Request updated successfully");
+                setPassword('');
+                setConfPassword('');
+            } else {
+                console.error('Failed to update request');
+                setMessage("Failed to update request");
                 setOpenMessage(true);
             }
-        } else {
-            setMessage("Passwords do not match");
+        } catch (error) {
+            console.error('Error:', error);
+            setMessage(error.toString());
             setOpenMessage(true);
         }
+
     };
 
 
-    //handle rejection
-    const handleReject = (event) => {
-        event.preventDefault(); // Prevent form submission if it's part of a form
-        // Your rejection logic here
-        console.log('Rejected'); // Placeholder logic
-        // You might want to update a status, send a request to your backend, etc.
-    };
+
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -80,10 +71,10 @@ const RequestDetailPopup = ({ open, onClose, user }) => {
                 </IconButton>
             </DialogTitle>
             <DialogContent>
-                <form onSubmit={handleSubmit}>
+                <form>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ flex: 1 }}>
-                            <Typography variant="h8" color="initial">Request Date: {user.first_name + " " + user.last_name}</Typography>
+                            <Typography variant="h8" color="initial">Request Date: {request.patientFirstName + " " + request.patientLastName}</Typography>
                         </div>
 
                     </div>
@@ -92,7 +83,7 @@ const RequestDetailPopup = ({ open, onClose, user }) => {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ flex: 1 }}>
-                            <Typography variant="h8" color="initial">Request Amount: {user.userType}</Typography>
+                            <Typography variant="h8" color="initial">Requested Amount: {request.neededAmount}</Typography>
                         </div>
                     </div>
 
@@ -100,7 +91,7 @@ const RequestDetailPopup = ({ open, onClose, user }) => {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ flex: 1 }}>
-                            <Typography variant="h8" color="initial">Request Reason: {user.userHospital}</Typography>
+                            <Typography variant="h8" color="initial">Request Reason: {request.requestReason}</Typography>
                         </div>
                     </div>
 
@@ -108,7 +99,7 @@ const RequestDetailPopup = ({ open, onClose, user }) => {
 
                     <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
                         <div style={{ flex: 1 }}>
-                            <Typography variant="h8" color="initial">Note: {user.userHospital}</Typography>
+                            <Typography variant="h8" color="initial">Requested blood type: {request.patientBloodType}</Typography>
                         </div>
                     </div>
 
@@ -116,17 +107,21 @@ const RequestDetailPopup = ({ open, onClose, user }) => {
 
                     <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
                         <div style={{ flex: 1 }}>
-                            <Typography variant="h8" color="initial">Status: {user.userHospital}</Typography>
+                            <Typography variant="h8" color="initial">Status: {request.status}</Typography>
                         </div>
                     </div>
 
                     <Box style={{ height: '15px' }}></Box>
 
                     <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'row', alignItems: 'center' }}>
-                        <Button type="button" variant="contained" style={{ backgroundColor: '#f44336', marginTop: '10px' }} 
-                        onClick={handleReject}>Reject</Button>
+                        <Button type="button" variant="contained" style={{ backgroundColor: '#f44336', marginTop: '10px' }}
+                            onClick={(e) => handleResult(e, { result: 'Reject' })}>Reject</Button>
+
                         <Box width={75}></Box>
-                        <Button type="submit" color="primary" variant="contained" style={{ backgroundColor: '#4CAF50', color: 'white', marginTop: '10px' }}>Approve</Button>
+
+                        <Button type="button" onClick={(e) => handleResult(e, { result: 'Accept' })} 
+                        color="primary" variant="contained" style={{ backgroundColor: '#4CAF50', 
+                        color: 'white', marginTop: '10px' }}>Approve</Button>
                     </div>
 
 

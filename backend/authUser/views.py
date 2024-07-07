@@ -633,6 +633,10 @@ class ListPatientRequestsView(generics.ListAPIView):
     def get_queryset(self):
         patient_id = self.kwargs['patient_id']
         return Request.objects.filter(patient_id=patient_id)
-    
+
+class ListAllRequestsView(generics.ListAPIView):
+
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
 
 

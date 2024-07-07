@@ -450,14 +450,24 @@ class PatientDetailSerializer(serializers.ModelSerializer):
 
 #request serializer
 class RequestSerializer(serializers.ModelSerializer):
+    dedicate_blood_hospital = serializers.CharField(source='dedicatedBloodBag.hospital.name', read_only=True)
+    patientFirstName = serializers.CharField(source='patient.first_name', read_only=True)
+    patientLastName = serializers.CharField(source='patient.last_name', read_only=True)
+    patientEmail = serializers.CharField(source='patient.email', read_only=True)
+    patientBloodType = serializers.CharField(source='patient.bloodType', read_only=True)
     class Meta:
         model = Request
-        fields = ['date','neededAmount', 'requestReason', 'patient', 'status']
+        fields = ['date','neededAmount', 'requestReason', 'patientFirstName', 'patientBloodType', 'patientEmail' ,'patientLastName' , 'dedicate_blood_hospital', 'patient', 'status', 'dedicatedBloodBag']
 
         extra_kwargs = {
             'status': {'required': False},
             'date': {'required': False},
-
+            'dedicatedBloodBag': {'required': False},
+            'dedicate_blood_hospital': {'required': False},
+            'patientFirstName': {'required': False},
+            'patientLastName': {'required': False},
+            'patientEmail': {'required': False},
+            'patientBloodType': {'required': False},
         }
 
 

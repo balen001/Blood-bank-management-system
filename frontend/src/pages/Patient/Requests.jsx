@@ -5,6 +5,7 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import RequestDetailPopup from '../../components/RequestDetailPopup';
 import PatientSideNav from '../../components/PatientSideNav';
 import SendRequestPopup from '../../components/SendRequestPopup';
+import PatientRequestDetailPopup from '../../components/PatientRequestDetailPopup';
 
 import { Box, Typography, Card, CardContent, Grid, Divider, IconButton, Button, Icon } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
@@ -46,10 +47,10 @@ function Requests() {
     // ];
 
 
-    const [users, setUsers] = useState([{}]);
+    const [requests, setRequests] = useState([{}]);
 
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchRequests = async () => {
             try {
                 const response = await fetch(`http://127.0.0.1:8000/api/requests/patient/${localStorage.getItem('userId')}/`, {
                     method: 'GET',
@@ -64,19 +65,19 @@ function Requests() {
                 const data = await response.json();
 
                 // console.log("Fetched data:", data);
-                setUsers(data);
+                setRequests(data);
 
             } catch (error) {
-                console.error('Error fetching users:', error);
+                console.error('Error fetching requests:', error);
             }
         };
 
-        fetchUsers();
+        fetchRequests();
     }, []);
 
     useEffect(() => {
-        console.log("Updated users:", users);
-    }, [users]);
+        console.log("Updated Requests:", requests);
+    }, [requests]);
 
 
     // const handleSearch = () => { // Added function
@@ -98,7 +99,7 @@ function Requests() {
     //deletion operation
 
 
-    const handleDelete = (user) => {
+    const handleDelete = (request) => {
         Swal.fire({
             title: 'Are you sure?',
             text: 'You will not be able undo this!',
@@ -111,10 +112,10 @@ function Requests() {
             heightAuto: true
         }).then((result) => {
             if (result.isConfirmed) {
-                const userId = user.id;
-                console.log('User ID to delete:', userId);
+                const requestId = request.id;
+                console.log('request ID to delete:', requestId);
                 const deleteData = {
-                    user_id: userId,
+                    request_id: requestId,
                 };
                 console.log('Delete data:', deleteData);
 
@@ -169,16 +170,23 @@ function Requests() {
     //-----------------------------------------------------------------------------------
 
     const [isPopupOpen, setPopupOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [isViewPopupOpen, setViewPopupOpen] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState(null);
 
 
-    const handleOpenPopup = (user) => {
-        setSelectedUser(user);
+    const handleOpenPopup = (request) => {
         setPopupOpen(true);
     };
 
+    const handleViewOpenPopup = (request) => {
+        setSelectedRequest(request);
+        setViewPopupOpen(true);
+    };
+
+
     const handleClosePopup = () => {
         setPopupOpen(false);
+        setViewPopupOpen(false);
     };
 
 
@@ -276,8 +284,8 @@ function Requests() {
                     <Box mt={5}></Box>
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', flexWrap: 'wrap' }}>
-                        {users.map((user) => (
-                            <Card variant="outlined" style={{ margin: '5px', width: '100%' }} key={user.id}>
+                        {requests.map((request) => (
+                            <Card variant="outlined" style={{ margin: '5px', width: '100%' }} key={request.id}>
                                 <CardContent>
                                     <Grid container spacing={2} alignItems="center">
                                         {/* <Grid item xs={2.75} alignItems="center">
@@ -289,7 +297,7 @@ function Requests() {
                                                 <Divider sx={{ width: '100%' }} />
                                                 <Box mt={1}></Box>
                                                 <Typography variant="body1" component="div">
-                                                    {user.id}
+                                                    {request.id}
                                                 </Typography>
                                             </Box>
                                         </Grid> */}
@@ -304,7 +312,7 @@ function Requests() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.date}
+                                                    {request.date}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -319,7 +327,7 @@ function Requests() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.neededAmount} Blood bag(s)
+                                                    {request.neededAmount} Blood bag(s)
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -336,7 +344,7 @@ function Requests() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.requestReason}
+                                                    {request.requestReason}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -353,7 +361,7 @@ function Requests() {
 
 
                                                 <Typography variant="body1" component="div">
-                                                    {user.status}
+                                                    {request.status}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -368,17 +376,17 @@ function Requests() {
                                                 <Divider sx={{ width: '100%' }} /> */}
                                                 {/* <Box mt={1}></Box> */}
 
-                                                {/* <IconButton aria-label="delete" onClick={() => handleDelete(user)} title='Delete user'>
+                                                {/* <IconButton aria-label="delete" onClick={() => handleDelete(request)} title='Delete request'>
                                                     <CancelIcon />
 
                                                 </IconButton> */}
 
 
-                                                {/* <IconButton aria-label="edit" onClick={() => handleOpenPopup(user)} title='change password'>
+                                                <IconButton aria-label="edit" onClick={() => handleViewOpenPopup(request)} title='change password'>
 
                                                     <VisibilityIcon />
 
-                                                </IconButton> */}
+                                                </IconButton>
 
 
 
@@ -399,6 +407,10 @@ function Requests() {
 
             {isPopupOpen && (
                 <SendRequestPopup open={isPopupOpen} onClose={handleClosePopup} userId={localStorage.getItem('userId')} />
+            )}
+
+            {isViewPopupOpen && (
+                <PatientRequestDetailPopup open={isViewPopupOpen} onClose={handleClosePopup} request = {selectedRequest} />
             )}
 
         </>
