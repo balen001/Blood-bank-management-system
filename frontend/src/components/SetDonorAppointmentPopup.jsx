@@ -106,10 +106,12 @@ const SetDonorAppointmentPopup = ({ open, onClose, personEmail }) => {
             const responseData = await response.json(); // This can help debug server response
     
             if (response.ok) {
-                setOpenMessage(true);
                 setMessage("Appointment set successfully");
+                setOpenMessage(true);
+
                 setStartTime('');
                 setEndTime('');
+                setTimeout(() => {window.location.reload();}, 1500);
             } else {
                 console.error('Failed to set appointment:', responseData); // Log detailed error response
                 setMessage("Failed to set appointment");

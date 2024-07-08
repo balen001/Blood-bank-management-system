@@ -4,8 +4,8 @@ from django.urls import path, include
 from authUser.views import CreatePersonView, UserView, AddHospitalView, AddReceptionistView, AddDoctorView, HospitalView, AllUsersView
 from authUser.views import ChangePasswordView, UpdateSuperUserView, SuperuserDetailView, ChangeSuperuserPasswordView, DeleteUserView, AppointmentCreateView
 from authUser.views import TakenTimeslotsView, TodayAppointmentsView, DeleteAppointmentView, DonorDetailView, UpdateDonorDetailsView, CreateDonationView
-from authUser.views import UpdatePatientDetailsView, CreateRequestView, ListPatientRequestsView, ListAllRequestsView, DedicateBloodBagView
-from authUser.views import AllPersonsView
+from authUser.views import UpdatePatientDetailsView, CreateRequestView, ListPatientRequestsView, ListAllRequestsView, DedicateBloodBagView, DeleteUserNotificationsView
+from authUser.views import AllPersonsView, DonorDonationRecordsView, PatientTransfusionRecordView, CreateNotificationsView, UserNotificationsView
 from authUser.views import PersonAppointmentsListView, ChangeDonorPatientDoctorReceptionistPasswordView, UpdateUserAccountView, UserDetailView, PatientDetailView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
@@ -34,10 +34,17 @@ urlpatterns = [
 
     path('api/donor/<int:pk>/', DonorDetailView.as_view(), name='donor_detail'),
     path('api/donor/updateprofile/<int:pk>/', UpdateDonorDetailsView.as_view(), name='donor_update_profile'),
+    path('api/donor/donationrecords/<int:donor_id>/', DonorDonationRecordsView.as_view(), name='donor_donation_records'),
+
+    path('api/sendnotifications/', CreateNotificationsView.as_view(), name='send_notifications'),
+    path('api/user/notifications/<int:userId>/', UserNotificationsView.as_view(), name='user_notifications'),
+    path('api/user/notifications/delete/<int:userId>/', DeleteUserNotificationsView.as_view(), name='delete_user_notifications'),
+
     path('api/patient/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),
     path('api/patient/updateprofile/<int:pk>/', UpdatePatientDetailsView.as_view(), name='patient_update_profile'),
     path('api/patient/createrequest/', CreateRequestView.as_view(), name='create_request'),
     path('api/requests/patient/<int:patient_id>/', ListPatientRequestsView.as_view(), name='patient_requests'),
+    path('api/transfusions/patient/<int:patient_id>/', PatientTransfusionRecordView.as_view(), name='patient_transfusions'),
     path('api/requests/all/', ListAllRequestsView.as_view(), name='all_patient_requests'),
 
     path('api/user/<int:pk>/', UserDetailView.as_view(), name='user_detail'),

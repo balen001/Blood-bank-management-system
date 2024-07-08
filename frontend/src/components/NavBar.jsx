@@ -20,7 +20,8 @@ import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
-
+import { useEffect, useState } from 'react';
+import { ACCESS_TOKEN } from '../constants';
 
 const AppBar = styled(MuiAppBar, {
 
@@ -32,14 +33,39 @@ const AppBar = styled(MuiAppBar, {
 
 // Notification clearing logic
 
-async function clearAllNotifications() {
+// async function clearAllNotifications() {
+//   try {
+//     const response = await axios.delete(''); // Add an endpoint to clear all notifications
+//     console.log(response.data);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
+
+
+const clearAllNotifications = async () => {
   try {
-    const response = await axios.delete(''); // Add an endpoint to clear all notifications
-    console.log(response.data);
+
+    const response = await fetch(`http://127.0.0.1:8000/api/user/notifications/delete/${localStorage.getItem('userId')}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+      }
+    });
+
+    if (response.ok) {
+
+      setTimeout(() => {window.location.reload();}, 1000);
+
+    } else {
+
+    }
   } catch (error) {
-    console.error(error);
+    console.error('Error:', error);
+    Swal.fire('Error!', 'An error occurred.', 'error');
   }
-}
+};
 
 
 
@@ -124,6 +150,22 @@ export default function NavBar() {
   };
 
 
+  const formatDateAMPM = (dateString) => {
+    const date = new Date(dateString);
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12' in AM/PM format
+    const formattedTime = hours + ':' + minutes + ' ' + ampm;
+    return formattedTime;
+  };
+
+
+
+
+
+
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -173,12 +215,59 @@ export default function NavBar() {
     setNotificationsAnchorEl(event.currentTarget);
   };
 
-  const notifications = ["Notification 1 ---------------------\n----------------------", "Notification 2", "Notification 3"]; // later this should be fetched from the database
+
+  const [notifications, setNotifications] = useState([{}]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/user/notifications/${localStorage.getItem('userId')}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setNotifications(data);
+
+
+
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  useEffect(() => {
+    console.log("Updated notifications:", notifications);
+  }, [notifications]);
+
+
+
+
+
+
+
+
+
+
+
 
   const notificationsMenuId = 'primary-notifications-menu';
   const renderNotificationsMenu = (
     <Menu
-      sx={{ '& .MuiPaper-root': { width: '250px' } }}
+      sx={{
+        '& .MuiPaper-root': {
+          width: '250px', maxHeight: '300px',
+          overflow: 'auto'
+        }
+      }}
       anchorEl={notificationsAnchorEl}
       anchorOrigin={{
         vertical: 'top',
@@ -195,17 +284,31 @@ export default function NavBar() {
     >
       {notifications.map((notification, index) => (
         <MenuItem key={index} onClick={handleNotificationsMenuClose}>
-          <div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>{notification}</div>
+          {/* <div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>
+            
+            {notification}
+
+
+          </div> */}
+
+          <div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>
+            {notification.message}
+            <br />
+            <span style={{ fontSize: 10, color: 'gray' }}>
+              {formatDateAMPM(notification.created_at)}
+            </span>
+          </div>
+
         </MenuItem>
       ))}
 
 
 
       <Box display="flex" justifyContent="space-between">
-        <MenuItem onClick={() => { navigate("/notifications") }} style={{ whiteSpace: 'pre-wrap', fontSize: 12 }} >
+        {/* <MenuItem onClick={() => { navigate("/notifications") }} style={{ whiteSpace: 'pre-wrap', fontSize: 12 }} >
           <VisibilityIcon fontSize="small" />
           View notifications
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem onClick={() => { clearAllNotifications(); handleNotificationsMenuClose(); }}> {/*Clear the notifications in the database*/}
           <DeleteIcon fontSize="small" />
           <div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>Clear all</div>
@@ -252,18 +355,18 @@ export default function NavBar() {
           // Added onClick handler to open notifications menu
           onClick={handleNotificationsMenuOpen}
         >
-          <Badge badgeContent={17} color="error">
+          <Badge badgeContent={notifications.length} color="error">
             <NotificationsIcon />
           </Badge>
         </IconButton>
         <p>Notifications</p>
       </MenuItem>
 
-      
-        { renderNotificationsMenu }
-      
 
-      
+      {renderNotificationsMenu}
+
+
+
 
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
@@ -334,7 +437,7 @@ export default function NavBar() {
                 // Added onClick handler to open notifications menu
                 onClick={handleNotificationsMenuOpen}
               >
-                <Badge badgeContent={17} color="error">
+                <Badge badgeContent={notifications.length} color="error">
                   <NotificationsIcon />
                 </Badge>
               </IconButton>

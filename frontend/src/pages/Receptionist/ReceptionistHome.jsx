@@ -1,10 +1,8 @@
 import React from 'react';
 import NavBar from "../../components/NavBar";
-import AdminSideNav from "../../components/AdminSideNav";
-import ConfirmDialog from '../../components/ConfirmDialog';
-import ChangePassPopup from '../../components/ChangePassPopup';
 
-
+import { Snackbar } from '@mui/material';
+import Alert from '@mui/material/Alert';
 import { Box, Typography, Card, CardContent, Grid, Divider, IconButton, Button, Icon } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -28,10 +26,14 @@ import ReceptionistSideNav from '../../components/ReceptionistSideNav';
 import SetAppointmentPopup from '../../components/SetAppointmentPopup';
 
 
+
+
 function ReceptionistHome() {
 
-    const [searchQuery, setSearchQuery] = useState(''); // Added line
-    const [filteredAppointments, setFilteredAppointments] = useState([]); // Added line
+    const [searchQuery, setSearchQuery] = useState(''); 
+    const [filteredAppointments, setFilteredAppointments] = useState([]);
+
+    const [message, setMessage] = useState(''); 
 
 
 
@@ -96,7 +98,7 @@ function ReceptionistHome() {
         const hours12 = ((hours + 11) % 12 + 1);
         const amPm = hours >= 12 ? 'PM' : 'AM';
         return `${hours12}:${minutes} ${amPm}`;
-      }
+    }
 
 
 
@@ -121,10 +123,10 @@ function ReceptionistHome() {
             if (result.isConfirmed) {
                 const appointmentId = appointment.id;
                 console.log('Appointment ID to delete:', appointmentId);
-    
+
                 const deleteAppointment = async () => {
                     try {
-                        
+
                         const response = await fetch(`http://127.0.0.1:8000/api/deleteappointment/${appointmentId}/`, {
                             method: 'DELETE',
                             headers: {
@@ -132,7 +134,7 @@ function ReceptionistHome() {
                                 'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
                             }
                         });
-    
+
                         if (response.ok) {
                             Swal.fire({
                                 title: 'Deleted!',
@@ -151,12 +153,12 @@ function ReceptionistHome() {
                         Swal.fire('Error!', 'An error occurred.', 'error');
                     }
                 };
-    
+
                 deleteAppointment(); // Call the async function
-    
+
             } else if (result.dismiss === Swal.DismissReason.cancel) {
                 // handle cancel
-    
+
                 console.log("Appointment delete canceled");
             }
         });
@@ -166,16 +168,79 @@ function ReceptionistHome() {
     //-----------------------------------------------------------------------------------
 
     const [isPopupOpen, setPopupOpen] = useState(false);
-    const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+    const [open, setOpen] = useState(false);
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+
+    };
 
 
     const handleOpenPopup = () => {
-        setSelectedAppointment();
+
         setPopupOpen(true);
     };
 
     const handleClosePopup = () => {
         setPopupOpen(false);
+    };
+
+    // const handleSetReminderOpenPopup = () => {
+
+    //     setReminderPopupOpen(true);
+    // };
+
+    // const handleCloseReminderOpenPopup = () => {
+    //     setReminderPopupOpen(false);
+    // };
+
+    const handleSendingNotifications = async (e) => {
+        e.preventDefault();
+
+        const reminderData = {
+            appointments: appointments
+        };
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/sendnotifications/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+                },
+                body: JSON.stringify(reminderData),
+                console: console.log(JSON.stringify(reminderData))
+            });
+
+            if (response.ok) {
+                const responseData = await response.json();
+                console.log(responseData);
+
+
+                setMessage("Reminders sent successfully");
+
+
+                setOpen(true);
+
+                setTimeout(() => window.location.reload(), 3000);
+
+
+            } else {
+                const errorData = await response.json();
+                console.error('Error:', errorData);
+                setMessage("Failed to send reminders");
+                setOpen(true);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            setMessage(error.toString());
+            setOpen(true);
+        }
     };
 
 
@@ -215,14 +280,14 @@ function ReceptionistHome() {
                                         backgroundColor: '#038253',
                                     },
                                 }}
-                                onClick={() => handleOpenPopup()}  //you should change this later and put something else for send reminders
+                                onClick={(e) => handleSendingNotifications(e)}  //you should change this later and put something else for send reminders
                             >
-                                    Send reminders
+                                Send reminders
                             </Button>
 
                             <Button
                                 startIcon={<AddIcon />}
-                                
+
                                 sx={{
                                     backgroundColor: '#04AA6D',
                                     color: 'white',
@@ -320,7 +385,7 @@ function ReceptionistHome() {
                                                 <Divider sx={{ width: '100%' }} />
                                                 <Box mt={1}></Box>
                                                 <Typography variant="body1" component="div">
-                                                {appointment.person_first_name} {appointment.person_last_name}
+                                                    {appointment.person_first_name} {appointment.person_last_name}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -351,7 +416,7 @@ function ReceptionistHome() {
 
 
                                                 <Typography variant="body1" component="div">
-                                                {appointment.start_time ? formatTime24To12(appointment.start_time) : "Time not available"}
+                                                    {appointment.start_time ? formatTime24To12(appointment.start_time) : "Time not available"}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -366,7 +431,7 @@ function ReceptionistHome() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                {appointment.end_time ? formatTime24To12(appointment.end_time) : "Time not available"}
+                                                    {appointment.end_time ? formatTime24To12(appointment.end_time) : "Time not available"}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -409,6 +474,29 @@ function ReceptionistHome() {
             {isPopupOpen && (
                 <SetAppointmentPopup open={isPopupOpen} onClose={handleClosePopup} />
             )}
+
+
+
+            <div>
+
+
+                {
+
+                    <Snackbar
+                        open={open}
+                        autoHideDuration={6000}
+                        onClose={handleClose}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    >
+                        <Alert onClose={handleClose} severity={message === "Reminders sent successfully" ? 'success' : 'error'} sx={{ width: '100%' }}>
+                            {message}
+                        </Alert>
+                    </Snackbar>
+                }
+
+
+            </div>
+            
 
         </>
 

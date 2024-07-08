@@ -8,21 +8,71 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { ACCESS_TOKEN } from '../../constants';
+import { useEffect, useState } from 'react';
+
+
+
 
 
 
 
 function TransfusionHistory() {
 
-    let transfusions = [
-        { id: 1, date: '1-10-2023', time: '12:13', amount: 100 },
-        { id: 1, date: '1-10-2023', time: '12:13', amount: 100 },
+    const [transfusions, setTransfusions] = useState([{}]);
 
 
-    ];
+    useEffect(() => {
+        const fetchTransfusions = async () => {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/transfusions/patient/${localStorage.getItem('userId')}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+
+                // console.log("Fetched data:", data);
+                setTransfusions(data);
+
+            } catch (error) {
+                console.error('Error fetching records:', error);
+            }
+        };
+
+        fetchTransfusions();
+    }, []);
+
+    useEffect(() => {
+        console.log("Updated records:", transfusions);
+    }, [transfusions]);
+
 
 
     const [value, setValue] = React.useState(dayjs());
+
+
+    function formatTimeToAmPm(time) {
+
+        if (typeof time !== 'string') {
+            console.error('Invalid time value:', time);
+            // Return a default value or handle the error as appropriate
+            return 'Invalid time';
+        }
+
+        const [hours24, minutes] = time.split(':');
+        const hours = parseInt(hours24, 10);
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const hours12 = hours % 12 || 12; // Convert 24h to 12h format and handle midnight
+        return `${hours12}:${minutes} ${ampm}`;
+    }
+
+
     return (
         <>
             <NavBar />
@@ -41,9 +91,9 @@ function TransfusionHistory() {
 
 
                     <Grid item xs={3} alignItems="center">
-                        <Box display="flex" flexDirection="row" alignItems="center">
+                        <Box display="flex" flexDirection="row" alignItems="center" height={50}>
 
-                            <Box>
+                            {/* <Box>
                                 <Box mt={1.5}></Box>
                                 <Typography variant="h7" component="div" fontWeight="bold" gutterBottom ml={1}>
                                     Search by date
@@ -82,7 +132,9 @@ function TransfusionHistory() {
                                         />
                                     </DemoContainer>
                                 </LocalizationProvider>
-                            </Box>
+                            </Box> */}
+
+                            
                         </Box>
                     </Grid>
 
@@ -130,7 +182,7 @@ function TransfusionHistory() {
 
 
                                                 <Typography variant="body1" component="div">
-                                                    {transfusion.time}
+                                                    {formatTimeToAmPm(transfusion.time)}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -144,7 +196,7 @@ function TransfusionHistory() {
                                                 <Box mt={1}></Box>
 
                                                 <Typography variant="body1" component="div">
-                                                    {transfusion.amount} bags
+                                                    {transfusion.receivedAmount} bags
                                                 </Typography>
                                             </Box>
                                         </Grid>

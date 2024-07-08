@@ -5,7 +5,8 @@ from rest_framework import generics, serializers
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
 from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer, CreateAppointmentSerializer
 from .serializers import DateSerializer, TodayAppointmentSerializer, PersonDetailSerializer, AppointmentsSerializer, PatientDetailSerializer, RequestSerializer
-
+from .serializers import DonationRecordSerializer, TransfusionRecordSerializer, AppointmentInputSerializer, AppointmentListInputSerializer
+from .serializers import NotificationSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from .permissions import IsSuperUser
 from .utils import convert_to_ampm
@@ -20,6 +21,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
+from datetime import datetime
 
 from .serializers import MyTokenObtainPairSerializer
 
@@ -797,3 +799,81 @@ class DedicateBloodBagView(APIView):
             return Response({'error': 'Invalid request result'}, status=status.HTTP_400_BAD_REQUEST)
         
 
+
+
+#retrieve donation_records by id
+
+
+class DonorDonationRecordsView(generics.ListAPIView):
+    serializer_class = DonationRecordSerializer
+
+    def get_queryset(self):
+        donor_id = self.kwargs['donor_id']
+        return Donation_record.objects.filter(donor_id=donor_id).order_by('-date', '-time')
+    
+
+
+#retrieve transfusion_records by id
+
+class PatientTransfusionRecordView(generics.ListAPIView):
+    serializer_class = TransfusionRecordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        patient_id = self.kwargs['patient_id']
+        return Transfusion_record.objects.filter(patient_id=patient_id).order_by('-date', '-time')
+    
+
+
+#send notifications to the ones who have appointment
+class CreateNotificationsView(APIView):
+    def post(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = AppointmentListInputSerializer(data=request.data)
+        if serializer.is_valid():
+            appointments = serializer.validated_data['appointments']
+            notifications = []
+            for appointment in appointments:
+                person_id = appointment['person_id']
+                person = Person.objects.get(id=person_id)
+
+                # Convert start_time and end_time to AM/PM format
+                # start_time_obj = datetime.strptime(appointment['start_time'], '%H:%M')
+                start_time_formatted = appointment['start_time'].strftime('%I:%M %p')
+
+                message = f"Dear {person.first_name} {person.last_name}, you have an appointment today at {start_time_formatted}."
+                notification = Notification(message=message, recipient=person)
+                notifications.append(notification)
+            Notification.objects.bulk_create(notifications)
+            return Response({"message": "Notifications created successfully."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+#retireve notifications by userId
+class UserNotificationsView(generics.ListAPIView):
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs['userId']
+        return Notification.objects.filter(recipient_id=user_id).order_by('-created_at')
+
+
+
+#delete notifications of a given userId
+class DeleteUserNotificationsView(APIView):
+
+    def delete(self, request, userId):
+        try:
+            notifications = Notification.objects.filter(recipient_id=userId)
+            count, _ = notifications.delete()
+            return Response({
+                'message': f'{count} notifications deleted successfully.'
+            })
+        except Notification.DoesNotExist:
+            return Response({
+                'message': 'No notifications found for the user.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        

@@ -1,5 +1,5 @@
-from .models import Donor
-from .models import Donor, Patient, Hospital, Receptionist, Doctor, Appointment, Person, Request
+from .models import Donor, Patient, Hospital, Receptionist, Doctor, Appointment, Person, Request, Donation_record, Transfusion_record
+from .models import Notification
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.hashers import make_password
@@ -226,6 +226,21 @@ class AddReceptionistSerializer(serializers.ModelSerializer):
 #     }
 
 
+class AppointmentInputSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    date = serializers.DateField()
+    start_time = serializers.TimeField()
+    end_time = serializers.TimeField()
+    person_first_name = serializers.CharField(max_length=100)
+    person_last_name = serializers.CharField(max_length=100)
+    person_id = serializers.IntegerField()
+    person_email = serializers.EmailField()
+
+class AppointmentListInputSerializer(serializers.Serializer):
+    appointments = AppointmentInputSerializer(many=True)
+
+
+
 # -------------------------------------------Doctor-------------------------
 
 
@@ -421,7 +436,10 @@ class UserDetailSerializer(serializers.ModelSerializer):
         
         }
 
-
+class DonationRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donation_record
+        fields = ['id', 'amount', 'date', 'time', 'donor']
 
 #---------------------------------patient----------------------------
 
@@ -472,8 +490,24 @@ class RequestSerializer(serializers.ModelSerializer):
 
 
 
+class TransfusionRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transfusion_record
+        fields = ['id', 'receivedAmount', 'date', 'time']
 
 
+
+
+
+
+
+#Notifications serializer
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'
 
 
 

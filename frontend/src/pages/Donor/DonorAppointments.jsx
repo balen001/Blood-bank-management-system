@@ -206,7 +206,7 @@ function DonorAppointments() {
 
                         <Box display="flex" flexDirection="row" alignItems="center">
 
-                            <Box>
+                            {/* <Box>
                                 <Box mt={1.5}></Box>
                                 <Typography variant="h7" component="div" fontWeight="bold" gutterBottom ml={1}>
                                     Search by date
@@ -249,7 +249,7 @@ function DonorAppointments() {
 
 
                             <Box mr={3}></Box>
-                            {/* Search button */}
+                            
                             <Box display="flex" alignItems="right" >
 
 
@@ -261,14 +261,14 @@ function DonorAppointments() {
                                 }}
 
                                 onClick={() => {
-                                    // Search logic here
+                                    
                                   }}
                                 
                                 >
                                     Search
                                 </Button>
 
-                            </Box>
+                            </Box> */}
 
 
                         </Box>
