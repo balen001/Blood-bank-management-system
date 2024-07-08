@@ -84,7 +84,7 @@ function PatientRequests() {
             setFilteredUsers(users); // Added line
         } else {
             const results = users.filter(user =>
-                `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
+                `${user.patientFirstName} ${user.patientLastName}`.toLowerCase().includes(searchQuery.toLowerCase())
             );
             setFilteredUsers(results);
         }

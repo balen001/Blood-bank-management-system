@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import DonorSideNav from '../../components/DonorSideNav';
 import Box from '@mui/material/Box';
 import NavBar from '../../components/NavBar';
@@ -61,7 +62,7 @@ const bloodOptions = [
 ];
 
 
-let message = 'Donor registered successfully';
+let message = '';
 
 
 
@@ -154,37 +155,40 @@ function RegisterDonor() {
         // console.log(donorData)
         if (password === confirmPassword) {
 
-            console.log(values);
+            // console.log(values);
             try {
-                // const { confirmPassword, ...dataToSend } = values;
-                // if (dataToSend.contact_no === '') {
-                //     delete dataToSend.contact_no;
-                // }
-                console.log(JSON.stringify(dataToSend))
+
+                // console.log(JSON.stringify(donorData))
                 const response = await axios.post('http://127.0.0.1:8000/api/user/register/', JSON.stringify(donorData), {
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 })
                     .then(response => {
-                        // setShowMessage(true);
+                        message = 'Donor registered successfully'
                         setOpen(true);
-    
+                        setTimeout(() => window.location.reload(), 3000);
+
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        message = "Failed to register donor";
+                        setOpen(true);
                     });
                 // Handle any error actions here
-            } finally {
-                actions.setSubmitting(false);
+            } catch (error) {
+                console.error('Error:', error);
+                message = "Failed to register donor";
+                setOpen(true);
             }
 
 
         }
 
         else {
-            setOpen(true);
             message = 'Passwords don\'t match.';
+            setOpen(true);
+            
         }
 
     };
@@ -343,7 +347,7 @@ function RegisterDonor() {
                                 </Box>
 
                             </Grid>
-                            
+
 
 
                         </Grid>

@@ -8,10 +8,7 @@ import Box from '@mui/material/Box';
 const RequestDetailPopup = ({ open, onClose, request }) => {
     const [openMessage, setOpenMessage] = useState(false);
     const [message, setMessage] = useState("");
-    const [password, setPassword] = useState('');
-    const [confPassword, setConfPassword] = useState('');
-    const [adminPass, setAdminPass] = useState('');
-    const [adminEmail, setAdminEmail] = useState('');
+
 
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -23,16 +20,15 @@ const RequestDetailPopup = ({ open, onClose, request }) => {
     const handleResult = async (e, result) => {
         e.preventDefault();
 
-
         const resultData = {
-            result: result,
-            requestId: request,
-            id: request,
-            password: password,
+            result: result.result,
+            requestId: request.id,
+            patientBloodType: request.patientBloodType,
+            patientId: request.patient,
         };
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/admin/changeuserpassword/', {
+            const response = await fetch('http://127.0.0.1:8000/api/doctor/dedicate_blood_bag/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -42,13 +38,27 @@ const RequestDetailPopup = ({ open, onClose, request }) => {
             });
 
             if (response.ok) {
+                const responseData = await response.json();
+                console.log(responseData);
+
+                if (result.result === "Accepted") {
+                    setMessage("Request accepted successfully");
+                } else if (result.result === "Rejected") {
+                    setMessage("Request rejected successfully");
+                }
+                else if (result.result === "Transfused") {
+                    setMessage("Blood transfusion recorded successfully");
+                }
+
                 setOpenMessage(true);
-                setMessage("Request updated successfully");
-                setPassword('');
-                setConfPassword('');
+
+                setTimeout(() => window.location.reload(), 3000);
+
+
             } else {
-                console.error('Failed to update request');
-                setMessage("Failed to update request");
+                const errorData = await response.json();
+                console.error('Error:', errorData);
+                setMessage(errorData.message);
                 setOpenMessage(true);
             }
         } catch (error) {
@@ -56,9 +66,7 @@ const RequestDetailPopup = ({ open, onClose, request }) => {
             setMessage(error.toString());
             setOpenMessage(true);
         }
-
     };
-
 
 
 
@@ -114,14 +122,28 @@ const RequestDetailPopup = ({ open, onClose, request }) => {
                     <Box style={{ height: '15px' }}></Box>
 
                     <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'row', alignItems: 'center' }}>
+
+
+
+
                         <Button type="button" variant="contained" style={{ backgroundColor: '#f44336', marginTop: '10px' }}
-                            onClick={(e) => handleResult(e, { result: 'Reject' })}>Reject</Button>
+                            onClick={(e) => handleResult(e, { result: 'Rejected' })}>Reject</Button>
 
                         <Box width={75}></Box>
 
-                        <Button type="button" onClick={(e) => handleResult(e, { result: 'Accept' })} 
-                        color="primary" variant="contained" style={{ backgroundColor: '#4CAF50', 
-                        color: 'white', marginTop: '10px' }}>Approve</Button>
+                        <Button type="button" variant="contained" style={{
+                            backgroundColor: '#f44336', marginTop: '10px', backgroundColor: '#4CAF50',
+                            color: 'white'
+                        }}
+                            onClick={(e) => handleResult(e, { result: 'Transfused' })}>Blood transfused</Button>
+
+                        <Box width={75}></Box>
+
+                        <Button type="button" onClick={(e) => handleResult(e, { result: 'Accepted' })}
+                            color="primary" variant="contained" style={{
+                                backgroundColor: '#4CAF50',
+                                color: 'white', marginTop: '10px'
+                            }}>Accept</Button>
                     </div>
 
 
@@ -134,7 +156,7 @@ const RequestDetailPopup = ({ open, onClose, request }) => {
                 onClose={handleClose}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert onClose={handleClose} severity={message === "Request approved successfully" ? 'success' : 'error'} sx={{ width: '100%' }}>
+                <Alert onClose={handleClose} severity={(message === "Request accepted successfully" || message === "Request rejected successfully" || message === "Blood transfusion recorded successfully") ? 'success' : 'error'} sx={{ width: '100%' }}>
                     {message}
                 </Alert>
             </Snackbar>

@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from .models import Donor, Patient, User, Hospital, Receptionist, Doctor, Appointment, Person, Blood_bag, Donation_record, Request
+from .models import Donor, Patient, User, Hospital, Receptionist, Doctor, Appointment, Person, Blood_bag, Donation_record, Request, Notification
+from .models import Transfusion_record
 from rest_framework import generics, serializers
 from .serializers import DonorRegistrationSerializer, PatientRegistrationSerializer, AddHospitalSerializer, AddReceptionistSerializer, AddDoctorSerializer
 from .serializers import ChangePasswordSerializer, SuperUserUpdateSerializer, SuperuserSerializer, ChangeSuperuserPasswordSerializer, CreateAppointmentSerializer
@@ -326,6 +327,60 @@ class AddDoctorView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class AllPersonsView(APIView):
+    permission_classes = [IsAdminUser]  # later change it to IsDoctor document it in testing
+
+    def get(self, request):
+        users = []
+
+        # get all patients
+        patients = Patient.objects.all().values(
+            'id', 'email', 'gender', 'dateOfBirth', 'address', 'city'  , 'contact_no' ,'first_name', 'last_name', 'emergencyContact', 'bloodType', 'diseases', 'allergy' )
+        for patient in patients:
+            users.append({
+                'id': patient['id'],
+                'email': patient['email'],
+                'first_name': patient['first_name'],
+                'last_name': patient['last_name'],
+                'diseases': patient['diseases'],
+                'bloodType': patient['bloodType'],
+                'emergencyContact': patient['emergencyContact'],
+                'allergy': patient['allergy'],
+                'gender': patient['gender'],
+                'dateOfBirth': patient['dateOfBirth'],
+                'contact_no': patient['contact_no'],
+                'address': patient['address'],
+                'city': patient['city'],
+                'userType': 'patient',
+                
+
+            })
+
+        # get all donors
+        donors = Donor.objects.all().values('id', 'dateOfBirth', 'address', 'city', 'contact_no', 'email', 'gender' , 'first_name', 'last_name', 'emergencyContact', 'bloodType', 'diseases')
+        for donor in donors:
+            users.append({
+                'id': donor['id'],
+                'email': donor['email'],
+                'first_name': donor['first_name'],
+                'last_name': donor['last_name'],
+                'bloodType': donor['bloodType'],
+                'emergencyContact': donor['emergencyContact'],
+                'diseases': donor['diseases'],
+                'gender': donor['gender'],
+                'address': donor['address'],
+                'city': donor['city'],
+                'dateOfBirth': donor['dateOfBirth'],
+                'contact_no': donor['contact_no'],
+                'userType': 'donor',
+                
+            })
+
+        return Response(users, status=status.HTTP_200_OK)
+
+
+
+
 
 # {
 
@@ -407,7 +462,7 @@ class DeleteAppointmentView(APIView):
         return Response({'message': 'Appointment deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
 
 
-#List appointments
+# List appointments
 class PersonAppointmentsListView(generics.ListAPIView):
     serializer_class = AppointmentsSerializer
     permission_classes = [IsAuthenticated]
@@ -510,8 +565,6 @@ class CreateDonationView(APIView):
             )
             created_blood_bags.append(blood_bag)
 
-        
-        
         blood_bags_data = []
 
         for blood_bag in created_blood_bags:
@@ -520,7 +573,7 @@ class CreateDonationView(APIView):
                 'bloodType': blood_bag.bloodType,
                 'hospital': blood_bag.hospital.name,
                 'created_at': blood_bag.created_at
-                }
+            }
             )
 
         # Create Donation_record
@@ -611,9 +664,7 @@ class UpdatePatientDetailsView(generics.UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
-#-------------------Request-------------------------------------
+# -------------------Request-------------------------------------
 class CreateRequestView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = RequestSerializer(data=request.data)
@@ -625,7 +676,7 @@ class CreateRequestView(APIView):
             response_serializer = RequestSerializer(request_instance)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class ListPatientRequestsView(generics.ListAPIView):
     serializer_class = RequestSerializer
@@ -634,9 +685,115 @@ class ListPatientRequestsView(generics.ListAPIView):
         patient_id = self.kwargs['patient_id']
         return Request.objects.filter(patient_id=patient_id)
 
+
 class ListAllRequestsView(generics.ListAPIView):
 
-    queryset = Request.objects.all()
+    queryset = Request.objects.all().order_by('-date', '-time')
     serializer_class = RequestSerializer
 
+
+# Blood bag dedication
+NOT_ELIGIBLE_ALLERGIES = [
+    "Severe Allergic reaction (anaphylaxis)",
+    "Allergic to human blood products",
+    "Allergic to albumin",
+    "Allergic to anticoagulants"
+]
+
+NOT_ELIGIBLE_DISEASES = [
+    "HIV/AIDS", "Hepatitis B", "Hepatitis C", "Cancer", "Heart Disease",
+    "Chronic Kidney Disease", "Multiple Sclerosis", "Lupus", "Hemophilia", "Sickle Cell Disease", "Chagas Disease"
+]
+
+# Define the blood type compatibility dictionary
+BLOOD_TYPE_COMPATIBILITY = {
+    "A+": ["A+", "A-", "O+", "O-"],
+    "A-": ["A-", "O-"],
+    "B+": ["B+", "B-", "O+", "O-"],
+    "B-": ["B-", "O-"],
+    "AB+": ["AB+", "AB-", "A+", "A-", "B+", "B-", "O+", "O-"],
+    "AB-": ["AB-", "A-", "B-", "O-"],
+    "O+": ["O+", "O-"],
+    "O-": ["O-"]
+}
+
+
+class DedicateBloodBagView(APIView):
+
+    def post(self, request):
+        print(f'Received POST request with data: {request.data}')
+        patient_id = request.data.get('patientId')
+        patient_blood_type = request.data.get('patientBloodType')
+        request_id = request.data.get('requestId')
+        request_result = request.data.get('result')
+
+        # Retrieve the patient and request instances
+        try:
+            patient = Patient.objects.get(id=patient_id)
+            req = Request.objects.get(id=request_id)
+        except Patient.DoesNotExist:
+            return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Request.DoesNotExist:
+            return Response({'error': 'Request not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if (request_result== "Accepted"):
+            # Check if patient has any ineligible allergies
+            if patient.allergy in NOT_ELIGIBLE_ALLERGIES:
+                return Response({'message': 'Patient has an ineligible allergy'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if patient has any ineligible diseases
+            if any(disease in NOT_ELIGIBLE_DISEASES for disease in patient.diseases):
+                return Response({'message': 'Patient has an ineligible disease'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check for compatible blood bags that are not already dedicated
+            compatible_blood_types = BLOOD_TYPE_COMPATIBILITY.get(
+                patient_blood_type, [])
+            compatible_blood_bag = Blood_bag.objects.filter(
+                bloodType__in=compatible_blood_types,
+                Dedicated_BloodBags__isnull=True  # Filter out blood bags that are already dedicated
+            ).first()
+
+            if not compatible_blood_bag:
+                return Response({'message': 'No compatible blood bag available'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Dedicate the compatible blood bag to the request
+            req.dedicatedBloodBag = compatible_blood_bag
+            req.status = "Accepted"
+            req.save()
+
+
+            hospital_name = compatible_blood_bag.hospital.name
+
+            # Create notification for the patient
+            message = f"A blood bag from {hospital_name} has been dedicated to your request."
+            notification = Notification.objects.create(message=message, recipient=patient)
+
+            return Response({'message': 'Blood bag dedicated successfully'}, status=status.HTTP_200_OK)
+    
+
+        elif request_result == "Rejected":
+            req.status = "Rejected"
+            req.save()
+            message = f"Your request with request id: {request_id} has been rejected."
+            notification = Notification.objects.create(message=message, recipient=patient)
+
+            return Response({'message': 'Request rejected successfully'}, status=status.HTTP_200_OK)
+        
+        
+        elif request_result == "Transfused":
+            
+            
+            # Create the transfusion record
+            Transfusion_record.objects.create(receivedAmount=1, patient=patient)
+
+            dedicated_blood_bag = req.dedicatedBloodBag
+            req.delete()
+            if dedicated_blood_bag:
+                dedicated_blood_bag.delete()
+
+            return Response({'message': 'Transfusion recorded successfully'}, status=status.HTTP_200_OK)
+
+        else:
+            return Response({'error': 'Invalid request result'}, status=status.HTTP_400_BAD_REQUEST)
+        
 

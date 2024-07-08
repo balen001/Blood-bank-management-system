@@ -457,7 +457,7 @@ class RequestSerializer(serializers.ModelSerializer):
     patientBloodType = serializers.CharField(source='patient.bloodType', read_only=True)
     class Meta:
         model = Request
-        fields = ['date','neededAmount', 'requestReason', 'patientFirstName', 'patientBloodType', 'patientEmail' ,'patientLastName' , 'dedicate_blood_hospital', 'patient', 'status', 'dedicatedBloodBag']
+        fields = ['id', 'date','neededAmount', 'requestReason', 'patientFirstName', 'patientBloodType', 'patientEmail' ,'patientLastName' , 'dedicate_blood_hospital', 'patient', 'status', 'dedicatedBloodBag']
 
         extra_kwargs = {
             'status': {'required': False},

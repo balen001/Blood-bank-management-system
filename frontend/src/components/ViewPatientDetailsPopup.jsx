@@ -80,7 +80,7 @@ const ViewPatientDetailsPopup = ({ open, onClose, user }) => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ flex: 1 }}>
-                        <Typography variant="h8" color="initial">Gender: {user.userType}</Typography>
+                        <Typography variant="h8" color="initial">Gender: {user.gender}</Typography>
                     </div>
                 </div>
 
@@ -88,7 +88,14 @@ const ViewPatientDetailsPopup = ({ open, onClose, user }) => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ flex: 1 }}>
-                        <Typography variant="h8" color="initial">Date of birth: {user.userType}</Typography>
+                        <Typography variant="h8" color="initial">Date of birth: {user.dateOfBirth}</Typography>
+                    </div>
+                </div>
+                <Box style={{ height: '15px' }}></Box>
+
+                <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
+                    <div style={{ flex: 1 }}>
+                        <Typography variant="h8" color="initial">Blood type: {user.bloodType}</Typography>
                     </div>
                 </div>
 
@@ -96,7 +103,7 @@ const ViewPatientDetailsPopup = ({ open, onClose, user }) => {
 
                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
                     <div style={{ flex: 1 }}>
-                        <Typography variant="h8" color="initial">User type: {user.userType}</Typography>
+                        <Typography variant="h8" color="initial"> Diseases {`(if any)`}: {user.diseases[0]}, {user.diseases[1]}</Typography>
                     </div>
                 </div>
 
@@ -104,7 +111,7 @@ const ViewPatientDetailsPopup = ({ open, onClose, user }) => {
 
                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
                     <div style={{ flex: 1 }}>
-                        <Typography variant="h8" color="initial">Blood type: {user.userHospital}</Typography>
+                        <Typography variant="h8" color="initial"> Allergy {`(if any)`}: {user.allergy}</Typography>
                     </div>
                 </div>
 
@@ -112,18 +119,29 @@ const ViewPatientDetailsPopup = ({ open, onClose, user }) => {
 
                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
                     <div style={{ flex: 1 }}>
-                        <Typography variant="h8" color="initial"> Diseases {`(if any)`}: {user.userHospital}</Typography>
+                        <Typography variant="h8" color="initial">Address: {user.address}, {user.city}</Typography>
                     </div>
                 </div>
-
+            
+                
                 <Box style={{ height: '15px' }}></Box>
 
                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
                     <div style={{ flex: 1 }}>
-                        <Typography variant="h8" color="initial"> Allergies {`(if any)`}: {user.userHospital}</Typography>
+                        <Typography variant="h8" color="initial">Contact no.: {user.contact_no}</Typography>
                     </div>
                 </div>
+            
+                
+                <Box style={{ height: '15px' }}></Box>
 
+                <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
+                    <div style={{ flex: 1 }}>
+                        <Typography variant="h8" color="initial">Emergency Contact no.: {user.emergencyContact}</Typography>
+                    </div>
+                </div>
+            
+                
                 <Box style={{ height: '15px' }}></Box>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', flexDirection: 'row', alignItems: 'center' }}>

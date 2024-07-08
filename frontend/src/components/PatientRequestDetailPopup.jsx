@@ -119,12 +119,8 @@ const PatientRequestDetailPopup = ({ open, onClose, request }) => {
 
                     <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
                         <div style={{ flex: 1 }}>
-                            <Typography variant="h8" color="initial">Dedicated at: </Typography>
-                            {request.dedicatedBloodBag && (
-                                <Typography variant="body1" color="initial">
-                                    {request.dedicate_blood_hospital}
-                                </Typography>
-                            )}
+                            <Typography variant="h8" color="initial">{`Dedicated at: ${request.dedicatedBloodBag ? request.dedicate_blood_hospital : ''}`}</Typography>
+                            
                         </div>
                     </div>
 

@@ -5,7 +5,7 @@ from .Person import Person
 class Notification(models.Model):
 
     message = models.CharField(max_length=250)
-    recipients = models.ManyToManyField(Person, related_name='notifications')
+    recipient = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='notifications', null=True)
     # Assuming you have a Notification instance named notification
     # persons = notification.recipients.all()
 

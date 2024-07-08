@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import NavBar from '../../components/NavBar';
@@ -58,7 +59,7 @@ const bloodOptions = [
 ];
 
 
-let message = 'Patient registered successfully';
+let message = '';
 
 
 
@@ -151,13 +152,13 @@ function RegisterPatient() {
         // console.log(patientData)
         if (password === confirmPassword) {
 
-            console.log(values);
+            // console.log(values);
             try {
                 // const { confirmPassword, ...dataToSend } = values;
                 // if (dataToSend.contact_no === '') {
                 //     delete dataToSend.contact_no;
                 // }
-                console.log(JSON.stringify(dataToSend))
+                // console.log(JSON.stringify(patientData))
                 const response = await axios.post('http://127.0.0.1:8000/api/user/register/', JSON.stringify(patientData), {
                     headers: {
                         'Content-Type': 'application/json'
@@ -165,15 +166,21 @@ function RegisterPatient() {
                 })
                     .then(response => {
                         // setShowMessage(true);
+                        message = 'Patient registered successfully';
                         setOpen(true);
+                        setTimeout(() => window.location.reload(), 3000);
     
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        message = "Failed to register patient";
+                        setOpen(true);
                     });
                 // Handle any error actions here
-            } finally {
-                actions.setSubmitting(false);
+            } catch (error) {
+                console.error('Error:', error);
+                message = "Failed to register patient";
+                setOpen(true);
             }
 
 

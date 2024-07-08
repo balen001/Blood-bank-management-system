@@ -50,7 +50,7 @@ function ParticipantsPage() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/admin/users/', {
+                const response = await fetch('http://127.0.0.1:8000/api/doctor/viewpersons/', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -98,72 +98,72 @@ function ParticipantsPage() {
     //deletion operation
 
 
-    const handleDelete = (user) => {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: 'You will not be able to recover this',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
-            confirmButtonColor: 'red',
-            cancelButtonText: 'No, keep it',
-            width: '400px',
-            heightAuto: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const userId = user.id; 
-                console.log('User ID to delete:', userId);
-                const deleteData = {
-                    user_id: userId,
-                };
-                console.log('Delete data:', deleteData);
+    // const handleDelete = (user) => {
+    //     Swal.fire({
+    //         title: 'Are you sure?',
+    //         text: 'You will not be able to recover this',
+    //         icon: 'warning',
+    //         showCancelButton: true,
+    //         confirmButtonText: 'Yes, delete it!',
+    //         confirmButtonColor: 'red',
+    //         cancelButtonText: 'No, keep it',
+    //         width: '400px',
+    //         heightAuto: true
+    //     }).then((result) => {
+    //         if (result.isConfirmed) {
+    //             const userId = user.id; 
+    //             console.log('User ID to delete:', userId);
+    //             const deleteData = {
+    //                 user_id: userId,
+    //             };
+    //             console.log('Delete data:', deleteData);
     
-                const deleteUser = async () => {
-                    try {
-                        const response = await fetch('http://127.0.0.1:8000/api/admin/deleteuser/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
-                            },
-                            body: JSON.stringify(deleteData),
-                        });
+    //             const deleteUser = async () => {
+    //                 try {
+    //                     const response = await fetch('http://127.0.0.1:8000/api/admin/deleteuser/', {
+    //                         method: 'POST',
+    //                         headers: {
+    //                             'Content-Type': 'application/json',
+    //                             'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`
+    //                         },
+    //                         body: JSON.stringify(deleteData),
+    //                     });
     
-                        if (response.ok) {
-                            try {
-                                const data = await response.json();
-                                console.log("User deleted successfully:", data);
-                            } catch (e) {
-                                console.log("No JSON response, user deleted successfully.");
-                            }
+    //                     if (response.ok) {
+    //                         try {
+    //                             const data = await response.json();
+    //                             console.log("User deleted successfully:", data);
+    //                         } catch (e) {
+    //                             console.log("No JSON response, user deleted successfully.");
+    //                         }
     
-                            Swal.fire({
-                                title: 'Deleted!',
-                                text: 'User has been deleted.',
-                                icon: 'success'
-                            }).then(() => {
-                                // Optionally, you can reload or update your UI after deletion
-                                window.location.reload(); // Example: Reload the page
-                            });
-                        } else {
-                            console.error('Failed to delete user');
-                            Swal.fire('Error!', 'Failed to delete user.', 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        Swal.fire('Error!', 'An error occurred.', 'error');
-                    }
-                };
+    //                         Swal.fire({
+    //                             title: 'Deleted!',
+    //                             text: 'User has been deleted.',
+    //                             icon: 'success'
+    //                         }).then(() => {
+    //                             // Optionally, you can reload or update your UI after deletion
+    //                             window.location.reload(); // Example: Reload the page
+    //                         });
+    //                     } else {
+    //                         console.error('Failed to delete user');
+    //                         Swal.fire('Error!', 'Failed to delete user.', 'error');
+    //                     }
+    //                 } catch (error) {
+    //                     console.error('Error:', error);
+    //                     Swal.fire('Error!', 'An error occurred.', 'error');
+    //                 }
+    //             };
     
-                deleteUser(); // Call the async function
+    //             deleteUser(); // Call the async function
     
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                // handle cancel
+    //         } else if (result.dismiss === Swal.DismissReason.cancel) {
+    //             // handle cancel
                 
-                console.log("User delete canceled");
-            }
-        });
-    };
+    //             console.log("User delete canceled");
+    //         }
+    //     });
+    // };
     
     
     //-----------------------------------------------------------------------------------
@@ -281,7 +281,7 @@ function ParticipantsPage() {
                                             </Box>
                                         </Grid> */}
 
-                                        <Grid item xs={2.75} alignItems="center">
+                                        <Grid item xs={3.5} alignItems="center">
                                             <Box display="flex" flexDirection="column" alignItems="center">
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
@@ -296,7 +296,7 @@ function ParticipantsPage() {
                                             </Box>
                                         </Grid>
 
-                                        <Grid item xs={2.75} alignItems="center">
+                                        <Grid item xs={3.5} alignItems="center">
                                             <Box display="flex" flexDirection="column" alignItems="center">
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
@@ -311,7 +311,7 @@ function ParticipantsPage() {
                                             </Box>
                                         </Grid>
 
-                                        <Grid item xs={2.75}>
+                                        <Grid item xs={3.5}>
                                             <Box display="flex" flexDirection="column" alignItems="center" >
                                                 <Box mt={2}></Box>
                                                 <Typography variant="h7" component="div" fontWeight="bold">
@@ -328,21 +328,6 @@ function ParticipantsPage() {
                                         </Grid>
 
 
-                                        <Grid item xs={2.75}>
-                                            <Box display="flex" flexDirection="column" alignItems="center" >
-                                                <Box mt={2}></Box>
-                                                <Typography variant="h7" component="div" fontWeight="bold">
-                                                    Hospital
-                                                </Typography>
-                                                <Divider sx={{ width: '100%' }} />
-                                                <Box mt={1}></Box>
-
-
-                                                <Typography variant="body1" component="div">
-                                                    {user.userHospital}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
 
 
                                         <Grid item xs={1}>
