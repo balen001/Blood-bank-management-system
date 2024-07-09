@@ -22,6 +22,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 from datetime import datetime
+from django.db.models import Count
 
 from .serializers import MyTokenObtainPairSerializer
 
@@ -877,3 +878,15 @@ class DeleteUserNotificationsView(APIView):
                 'message': 'No notifications found for the user.'
             }, status=status.HTTP_404_NOT_FOUND)
         
+
+
+
+class BloodBagCountView(APIView):
+
+    def get(self, request):
+        
+        blood_bag_counts = Blood_bag.objects.values('bloodType').annotate(count=Count('bloodType'))
+        data = [{'value': item['count'], 'label': item['bloodType']} for item in blood_bag_counts]
+
+        return Response(data, status=status.HTTP_200_OK)
+

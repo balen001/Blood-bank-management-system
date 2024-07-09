@@ -17,7 +17,8 @@ import heartImg from '../../assets/heart.png';
 import CustomLineChart from '../../components/CustomLineChart';
 import BasicPie from '../../components/BasicPie';
 import { style } from '@mui/system';
-
+import { useEffect, useState } from 'react';
+import { ACCESS_TOKEN } from '../../constants';
 
 
 
@@ -42,11 +43,54 @@ function DoctorHome() {
         ["Dec", 0],
     ];
 
-    const recievedBloodData = [
-        { id: 0, value: 10, label: 'A+' },
-        { id: 1, value: 15, label: 'B' },
-        { id: 2, value: 20, label: 'AB+' },
-    ];
+    // const recievedBloodData = [
+    //     {value: 10, label: 'A+' },
+    //     {value: 10, label: 'A-' },
+    //     {value: 15, label: 'B' },
+    //     {value: 20, label: 'AB+' },
+    // ];
+
+
+
+    const [recievedBloodData, setRecievedBloodData] = useState([{}]);
+
+    useEffect(() => {
+        const fetchBloodData = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/inventory/bloodbagcounts/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                setRecievedBloodData(data);
+
+                // console.log("Fetched data:", data);
+                
+
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        };
+
+        fetchBloodData();
+    }, []);
+
+
+
+
+
+    // const recievedBloodData = [
+    //     { id: 0, value: 10, label: 'A+' },
+    //     { id: 1, value: 15, label: 'B' },
+    //     { id: 2, value: 20, label: 'AB+' },
+    // ];
+
 
 
 
@@ -77,7 +121,7 @@ function DoctorHome() {
 
 
 
-                                            value={30}      //percentage of blood bags available/ total blood bags that inventory can hold
+                                            value={(recievedBloodData.length/100)*100}      //percentage of blood bags available/ total blood bags that inventory can hold
                                             startAngle={-110}
                                             endAngle={110}
                                             height={200}

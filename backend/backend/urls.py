@@ -6,6 +6,7 @@ from authUser.views import ChangePasswordView, UpdateSuperUserView, SuperuserDet
 from authUser.views import TakenTimeslotsView, TodayAppointmentsView, DeleteAppointmentView, DonorDetailView, UpdateDonorDetailsView, CreateDonationView
 from authUser.views import UpdatePatientDetailsView, CreateRequestView, ListPatientRequestsView, ListAllRequestsView, DedicateBloodBagView, DeleteUserNotificationsView
 from authUser.views import AllPersonsView, DonorDonationRecordsView, PatientTransfusionRecordView, CreateNotificationsView, UserNotificationsView
+from authUser.views import BloodBagCountView
 from authUser.views import PersonAppointmentsListView, ChangeDonorPatientDoctorReceptionistPasswordView, UpdateUserAccountView, UserDetailView, PatientDetailView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
@@ -46,6 +47,8 @@ urlpatterns = [
     path('api/requests/patient/<int:patient_id>/', ListPatientRequestsView.as_view(), name='patient_requests'),
     path('api/transfusions/patient/<int:patient_id>/', PatientTransfusionRecordView.as_view(), name='patient_transfusions'),
     path('api/requests/all/', ListAllRequestsView.as_view(), name='all_patient_requests'),
+
+    path('api/inventory/bloodbagcounts/', BloodBagCountView.as_view(), name='blood_bag_counts'),
 
     path('api/user/<int:pk>/', UserDetailView.as_view(), name='user_detail'),
 
